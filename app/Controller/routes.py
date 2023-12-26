@@ -1,14 +1,17 @@
 from flask import render_template, redirect, url_for, request, flash, get_flashed_messages
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash
-from app import app, db, login_manager
+from app import flask_app, db, login_manager
 from app.Model.models import User
 
+@flask_app.route('/')
+def welcome():
+    return render_template('welcome.html')
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-@app.route('/register', methods=['GET', 'POST'])
+@flask_app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -31,15 +34,21 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@flask_app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
-        user = User.query.filter_by(username=username).first()
+
+        #Server-side validation to check if email ends in @wsu.edu
+        if not email.endswith('@wsu.edu'):
+            flash('Please use your WSU email address to login.');
+            return redirect(url_for('login'));
+
+        user = User.query.filter_by(email=email).first()
 
         if user and user.check_password(password):
             login_user(user)
@@ -52,11 +61,11 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/logout')
+@flask_app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route('/')
-def home():
-    return render_template('home.html')
+#@flask_app.route('/')
+#def home():
+ #   return render_template('home.html')

@@ -1,0 +1,12 @@
+/* static/css/login.css */
+.login-container {
+    background: white;
+    /* Add other styles such as width, max-width, margin for centering, etc. */
+}
+
+.login-header h2 {
+    color: black;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    /* Add other text styling as needed */
+}

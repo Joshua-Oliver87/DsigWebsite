@@ -1,0 +1,15 @@
+<!-- app/templates/welcome.html -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+<div class="container" style="background-image: url({{ url_for('static', filename='images/welcome_background.png') }});">
+    <!-- Title and Subtitle -->
+    <div class="header">
+        <h1 class="title">Delta Sigma Phi</h1>
+        <h2 class="subtitle">Washington State University</h2>
+    </div>
+    <div class="buttons">
+        <!-- Buttons -->
+        <a href="{{ url_for('login') }}" class="button login-button">Login</a>
+        <a href="{{ url_for('register') }}" class="button register-button">Register</a>
+    </div>
+</div>

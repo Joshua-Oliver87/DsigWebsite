@@ -1,23 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    <form method="post" action="{{ url_for('login') }}">
-        Username: <input type="text" name="username" required><br>
-        Password: <input type="password" name="password" required><br>
-        <input type="submit" value="Login">
+<!-- Add this inside the <head> tag of your login.html -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+<!-- templates/login.html -->
+<div class="login-container">
+    <div class="login-header">
+        <h2>Hi, Welcome!</h2>
+        <!-- Add your welcome image here if needed -->
+    </div>
+    <form action="{{ url_for('login') }}" method="post">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="name@wsu.edu" pattern=".+@wsu\.edu$" title="Please enter an email address ending with @wsu.edu" required>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Password" required>
+
+        <div class="remember-me">
+            <input type="checkbox" id="remember" name="remember">
+            <label for="remember">Remember me</label>
+        </div>
+
+        <button type="submit" class="login-button">Log in</button>
+
+        <div class="alternative-login">
+            <!-- Insert social media login options here -->
+        </div>
+
+        <div class="signup-prompt">
+            Don’t have an account? <a href="{{ url_for('register') }}">Sign up</a>
+        </div>
     </form>
-    <a href="{{ url_for('register') }}">Register</a>
-</body>
-</html>
+</div>
