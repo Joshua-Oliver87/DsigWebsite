@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 import os
 
+
 flask_app = Flask(__name__, template_folder='View/templates', static_folder='View/static')
 flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///my_database.db'
 flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

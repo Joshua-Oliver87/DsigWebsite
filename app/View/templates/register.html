@@ -14,7 +14,8 @@
         {% endif %}
     {% endwith %}
     <form method="post" action="{{ url_for('register') }}">
-        Email: <input type="text" name="email" required><br>
+        Username: <input type="text" name="username" placeholder="Username" required><br>
+        Email: <input type="email" name="email" placeholder="name@wsu.edu" required pattern=".+@wsu\.edu$" title="Please use a WSU email"><br>
         Password: <input type="password" name="password" required><br>
         <input type="submit" value="Register">
     </form>

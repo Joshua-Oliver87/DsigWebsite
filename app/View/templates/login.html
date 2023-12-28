@@ -1,5 +1,6 @@
 <!-- Add this inside the <head> tag of your login.html -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+
 <!-- templates/login.html -->
 <div class="login-container">
     <div class="login-header">
@@ -7,8 +8,8 @@
         <!-- Add your welcome image here if needed -->
     </div>
     <form action="{{ url_for('login') }}" method="post">
-        <label for="email">Email address</label>
-        <input type="email" id="email" name="email" placeholder="name@wsu.edu" pattern=".+@wsu\.edu$" title="Please enter an email address ending with @wsu.edu" required>
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Your username" required>
         <label for="password">Password</label>
         <input type="password" id="password" name="password" placeholder="Password" required>
 

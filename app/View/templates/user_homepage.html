@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+    <!-- Optional: Add a link to your CSS file here -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to our homepage!</h1>
+        <!-- Optional: Include navigation, logo, etc. -->
+    </header>
+
+    <main>
+        <!-- Content unique to the user can go here -->
+        <p>Welcome, {{ current_user.username }}!</p>
+        <!-- Optional: Add more user-specific content -->
+    </main>
+
+    <footer>
+        <!-- Optional: Include footer information -->
+    </footer>
+</body>
+</html>
