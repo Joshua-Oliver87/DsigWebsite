@@ -3,6 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from app import flask_app, db, login_manager
 from app.Model.models import User
+from app.Controller.admin_decorator import admin_required
 
 @flask_app.route('/')
 def welcome():
@@ -61,7 +62,6 @@ def login():
 
     return render_template('login.html')
 
-
 @flask_app.route('/logout')
 def logout():
     logout_user()
@@ -70,3 +70,23 @@ def logout():
 @login_required
 def user_homepage():
     return render_template('user_homepage.html')
+
+@flask_app.route('/admin/dashboard')
+@login_required
+@admin_required
+def admin_dashboard():
+    #Admin dashboard code
+    return render_template('admin_dashboard.html')
+
+@flask_app.route('/make_admin/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def make_admin(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user.is_admin = True
+        db.session.commit()
+        flash("User promoted to admin successfully!")
+    else:
+        flash("User not found.")
+    return redirect(url_for('admin_dashboard'))
