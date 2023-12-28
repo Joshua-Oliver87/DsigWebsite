@@ -2,6 +2,9 @@ from flask import Flask
 from .Model.database import setup_db, db
 from .admin_views import MyModelView, MyAdminIndexView, LoginManager, Admin
 import os
+from flask_babel import Babel
+
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -10,6 +13,9 @@ flask_app = Flask(__name__, instance_relative_config=True, template_folder='View
 flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance/my_database.db')
 flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 flask_app.secret_key = os.urandom(24) #generate random secret key
+
+babel = Babel(flask_app)
+
 
 setup_db(flask_app)
 
