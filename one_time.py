@@ -9,6 +9,7 @@ def make_user_admin(username):
         user = User.query.filter_by(username=username).first()
         if user:
             user.is_admin = True
+            user.is_approved = True
             db.session.commit()
             print(f"{username} has been made an admin.")
         else:

@@ -7,6 +7,17 @@
         <h2>Hi, Welcome!</h2>
         <!-- Add your welcome image here if needed -->
     </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for message in messages %}
+            <div class="alert">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
     <form action="{{ url_for('login') }}" method="post">
         <label for="username">Username</label>
         <input type="text" id="username" name="username" placeholder="Your username" required>

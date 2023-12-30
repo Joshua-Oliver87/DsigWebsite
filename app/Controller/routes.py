@@ -10,7 +10,10 @@ def welcome():
     return render_template('welcome.html')
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    user = User.query.get(int(user_id))
+    if user and user.is_approved:
+        return user
+    return None
 
 @flask_app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -33,9 +36,10 @@ def register():
         # Hash the password and create a new user
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, email=email, password_hash=hashed_password)
+        new_user.is_approved = False
         db.session.add(new_user)
         db.session.commit()
-        flash('Registration successful. Please log in.')
+        flash('Registration pending.')
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -54,6 +58,9 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and user.check_password(password):
+            if not user.is_approved:
+                flash("Your account is not approved yet. Please wait for an admin to approve it.")
+                return redirect(url_for('login'))
             login_user(user)
             flash("Logged in successfully.")
             return redirect(url_for('user_homepage'))

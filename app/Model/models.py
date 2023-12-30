@@ -9,7 +9,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default = False, nullable=False)
-
+    is_approved = db.Column(db.Boolean, default=False, nullable=False)
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     def check_password(self, password):

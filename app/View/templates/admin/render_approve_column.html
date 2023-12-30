@@ -1,0 +1,7 @@
+{% macro render_approve_column(model) %}
+    {% if model.is_approved %}
+        <span class="label label-success">Approved</span>
+    {% else %}
+        <span class="label label-warning">Pending</span>
+    {% endif %}
+{% endmacro %}
