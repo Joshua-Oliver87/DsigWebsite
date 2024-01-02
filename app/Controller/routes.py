@@ -1,8 +1,10 @@
-from flask import render_template, redirect, url_for, request, flash, get_flashed_messages
+
+from flask import render_template, redirect, url_for, request, flash, get_flashed_messages, abort
 from flask_login import current_user, login_user, logout_user, login_required
+from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
 from app import flask_app, db, login_manager
-from app.Model.models import User
+from app.Model.models import User, Event, EventForm
 from app.Controller.admin_decorator import admin_required
 
 @flask_app.route('/')
@@ -97,3 +99,52 @@ def make_admin(user_id):
     else:
         flash("User not found.")
     return redirect(url_for('admin_dashboard'))
+
+@flask_app.route('/calendar')
+@login_required
+def calendar_view():
+    events = Event.query.all()
+    can_create_events = current_user.can_create_calendar_events
+    return render_template('calendar.html', events=events, can_create_events=can_create_events)
+
+
+# Assume you have a folder named 'partials' within the 'templates' directory
+@flask_app.route('/partials/<content_name>.html')
+@login_required
+def partials(content_name):
+    try:
+        # Render the partial HTML for the requested content
+        return render_template('partials/' + content_name + '.html')
+    except TemplateNotFound:
+        abort(404)  # Return a 404 if the template is not found
+
+
+@flask_app.route('/calendar-content')
+@login_required
+def calendar_content():
+    # This would return a partial HTML snippet containing the calendar.
+    return render_template('partials/calendar.html')
+
+
+@flask_app.route('/create-event', methods=['GET', 'POST'])
+@login_required
+def create_event():
+    if not current_user.can_create_events:
+        flash('You do not have permission to create events.')
+        return redirect(url_for('calendar_view'))
+
+    form = EventForm()
+    if form.validate_on_submit():
+        event = Event(
+            title=form.title.data,
+            description=form.description.data,
+            start_time=form.start_time.data,
+            end_time=form.end_time.data,
+            creator_id=current_user.id
+        )
+        db.session.add(event)
+        db.session.commit()
+        flash('Event created successfully!')
+        return redirect(url_for('calendar_view'))
+
+    return render_template('create_event.html', form=form)

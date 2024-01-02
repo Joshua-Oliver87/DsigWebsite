@@ -44,6 +44,23 @@ class UserAdminView(ModelView):
 
             flash(f'Failed to approve users. Error: {str(e)}', 'error')
 
+    # Action to toggle event creation permission
+    @action('toggle_event_creation', 'Toggle Event Creation Permission',
+                'Are you sure you want to toggle event creation permission for selected users?')
+    def action_toggle_event_creation(self, ids):
+        try:
+            query = User.query.filter(User.id.in_(ids))
+            count = 0
+            for user in query.all():
+                user.can_create_calendar_events = not user.can_create_calendar_events  # Toggle the permission
+                count += 1
+            db.session.commit()
+            flash(f'Event creation permission toggled for {count} users.')
+        except Exception as e:
+            if not self.handle_view_exception(e):
+                raise
+
+            flash(f'Failed to toggle event creation permission. Error: {str(e)}', 'error')
     def handle_view_exception(self, exc):
         return super(UserAdminView, self).handle_view_exception(exc)
 

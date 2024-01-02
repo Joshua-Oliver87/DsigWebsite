@@ -2,24 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome</title>
-    <!-- Optional: Add a link to your CSS file here -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Homepage</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Ensure the order of script imports if they depend on each other -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}"></script>
 </head>
 <body>
-    <header>
-        <h1>Welcome to our homepage!</h1>
-        <!-- Optional: Include navigation, logo, etc. -->
-    </header>
-
-    <main>
-        <!-- Content unique to the user can go here -->
-        <p>Welcome, {{ current_user.username }}!</p>
-        <!-- Optional: Add more user-specific content -->
-    </main>
-
-    <footer>
-        <!-- Optional: Include footer information -->
-    </footer>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <!-- Your sidebar content -->
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a href="#" class="nav-link" id="link-dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" id="link-calendar">Calendar</a></li>
+                    <!-- Add other tabs here -->
+                </ul>
+            </div>
+            <!-- Main content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div id='content-area'>
+                    <!-- Default content or Welcome Message will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

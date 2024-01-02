@@ -66,3 +66,20 @@
     /* Additional styles for register button if needed */
 }
 
+.container-fluid{
+    display: flex;
+    height: 100vh; /* full height */
+}
+
+.sidebar{
+    background: #D4D4D4
+    padding: 20px;
+    min-width: 250px;
+    flex-shrink: 0; /* So sidebar doesnt shrink on smaller screens */
+}
+
+.main-content{
+    flex-grow: 1;
+    background: white;
+    padding: 20px;
+}
