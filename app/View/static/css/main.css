@@ -1,8 +1,51 @@
+/* This is to prevent the entire page from being scrollable */
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
 .alert {
   padding: 10px;
   background-color: #f44336; /* Red */
   color: white;
   margin-bottom: 15px;
+}
+
+.nav{
+    list-style-type: none;
+    padding: 0;
+}
+
+.nav-item{
+    display: block
+}
+
+.nav-link{
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adds a shadow */
+    border-radius: 5px; /* Rounded corners for buttons */
+    margin-bottom: 5px; /* Adds space between buttons */
+}
+
+.nav-link:hover, .nav-link:focus{
+    background-color: #e9ecef;
+    color: #007bff;
+    text-decoration: none; /*no underlines on hover */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 768px) {
+    .sidebar{
+        width: 100%
+        position: static;
+    }
+    .main-content{
+        margin-left: 0;
+    }
 }
 
 .container {
@@ -20,7 +63,13 @@
 }
 
 .header{
-    /* Nothing for now */
+    width: 100%
+    background-color: #007bff;
+    color: black;
+    padding: 10px 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
 }
 
 .title {
@@ -71,15 +120,23 @@
     height: 100vh; /* full height */
 }
 
-.sidebar{
-    background: #D4D4D4
-    padding: 20px;
-    min-width: 250px;
-    flex-shrink: 0; /* So sidebar doesnt shrink on smaller screens */
+.sidebar {
+    position: fixed;
+    top: 0px; /* Adjust this if the header height changes */
+    left: 0;
+    width: 250px; /* Adjust width as necessary */
+    background-color: #f8f9fa;
+    padding-top: 20px;
+    z-index: 1000;
+    border-right: 2px solid #dee2e6; /* This is your vertical line */
+    overflow-y: auto;
+    height: calc(100% - 40px);
 }
 
+
 .main-content{
-    flex-grow: 1;
-    background: white;
+    margin-top: 60px;
+    margin-left: 250px;
     padding: 20px;
+    overflow-y: auto;
 }

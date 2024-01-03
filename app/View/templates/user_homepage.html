@@ -5,15 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Homepage</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Ensure the order of script imports if they depend on each other -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}"></script>
+    <!-- First include jQuery, then Popper.js, and then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" defer></script> <!-- Popper.js is required for Bootstrap 4 -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" defer></script>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/submit_event.js') }}" defer></script>
 </head>
 <body>
+    <div id="errorContainer"></div>
+    <div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventDetailModalLabel">Event Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Event details will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Edit Calendar Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <!-- Event Name -->
+                        <div class="mb-3">
+                            <label for="eventName" class="form-label">Name of Event</label>
+                            <input type="text" class="form-control" id="eventName" name="title" required>
+                        </div>
+                        <!-- Event Date -->
+                        <div class = "mb-3">
+                            <label for="eventStartDate" class="form-label">Start Date</label>
+                            <input type="datetime-local" class="form-control" id="eventStartDate" name="start" required>
+                        </div>
+                        <!--Event end date -->
+                         <div class = "mb-3">
+                            <label for="eventEndDate" class="form-label">End Date</label>
+                            <input type="datetime-local" class="form-control" id="eventEndDate" name="end" required>
+                        </div>
+
+                        <label for="eventDescription">Description</label>
+                        <textarea id="eventDescription" required></textarea>
+
+                        <!-- Add other fields similarly -->
+
+                        <button type="submit" class="btn btn-primary">Submit Event</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>My Website</h1>
+    </div>
+
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->

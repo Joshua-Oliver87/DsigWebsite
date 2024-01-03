@@ -6,7 +6,9 @@ function loadContent(contentName) {
         success: function(response) {
             $('#content-area').html(response);
             if (contentName === 'calendar') {
-                initializeCalendar(); // This function is defined in calendar-initialize.js
+                if (typeof initializeCalendar === "function") {
+                    initializeCalendar();
+                }
             }
         },
         error: function() {
@@ -23,3 +25,5 @@ $(document).ready(function() {
 
     // Handle click on other tabs similarly...
 });
+
+

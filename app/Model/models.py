@@ -24,15 +24,14 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    start_time = db.Column(db.DateTime, nullable=False)
-    end_time = db.Column(db.DateTime, nullable=False)
+    start = db.Column(db.DateTime, nullable=False)
+    end = db.Column(db.DateTime, nullable=False)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
     creator = db.relationship('User', backref='events')
 
 
 class EventForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    decription = StringField('Description')
-    start_time = DateTimeField('Start Time', validators=[DataRequired()])
-    end_time = DateTimeField('End Time', validators=[DataRequired()])
+    description = StringField('Description')
+    start = DateTimeField('Start Time', validators=[DataRequired()])
+    end = DateTimeField('End Time', validators=[DataRequired()])

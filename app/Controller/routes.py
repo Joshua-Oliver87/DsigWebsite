@@ -1,5 +1,5 @@
-
-from flask import render_template, redirect, url_for, request, flash, get_flashed_messages, abort
+from datetime import datetime
+from flask import render_template, redirect, url_for, request, flash, get_flashed_messages, abort, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
@@ -16,6 +16,10 @@ def load_user(user_id):
     if user and user.is_approved:
         return user
     return None
+
+@property
+def creator_name(self):
+    return self.creator.username
 
 @flask_app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -108,6 +112,27 @@ def calendar_view():
     return render_template('calendar.html', events=events, can_create_events=can_create_events)
 
 
+@flask_app.route('/add-event', methods=['POST'])
+@login_required
+#add @calendar_admin here or smth
+def add_event():
+    #Get data from request
+    event_data = request.form
+    new_event = Event(
+        title=event_data.get('title'),
+        description=event_data.get('description'),
+        start=datetime.fromisoformat(event_data.get('start')),
+        end=datetime.fromisoformat(event_data.get('end')),
+        creator_id = current_user.id
+    )
+
+    #Save event to the database
+    db.session.add(new_event)
+    db.session.commit()
+
+    #Respond to client that request is good
+    return jsonify({"message": "Event added successfully", "status": "success"})
+
 # Assume you have a folder named 'partials' within the 'templates' directory
 @flask_app.route('/partials/<content_name>.html')
 @login_required
@@ -148,3 +173,18 @@ def create_event():
         return redirect(url_for('calendar_view'))
 
     return render_template('create_event.html', form=form)
+
+@flask_app.route('/fetch-events')
+@login_required
+def fetch_events():
+    events = Event.query.all()
+    events_data = []
+    for event in events:
+        events_data.append({
+            'title': event.title,
+            'start': event.start.isoformat(),
+            'end': event.end.isoformat(),
+            'description': event.description,
+            'creator': event.creator.username,
+        })
+    return jsonify(events_data)
