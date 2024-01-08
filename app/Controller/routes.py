@@ -108,14 +108,15 @@ def make_admin(user_id):
 @login_required
 def calendar_view():
     events = Event.query.all()
-    can_create_events = current_user.can_create_calendar_events
-    return render_template('calendar.html', events=events, can_create_events=can_create_events)
-
+    canCreateEvents = current_user.canCreateEvents
+    return render_template('partials/calendar.html', events=events, can_create_events=canCreateEvents)
 
 @flask_app.route('/add-event', methods=['POST'])
 @login_required
-#add @calendar_admin here or smth
 def add_event():
+    if not current_user.canCreateEvents:
+        flash('You do not have permission add events.')
+        return jsonify({"message": "Permission denied", "status": "error"}), 403
     #Get data from request
     event_data = request.form
     new_event = Event(
@@ -123,7 +124,9 @@ def add_event():
         description=event_data.get('description'),
         start=datetime.fromisoformat(event_data.get('start')),
         end=datetime.fromisoformat(event_data.get('end')),
-        creator_id = current_user.id
+        creator_id = current_user.id,
+        event_type = event_data.get('event_type'),
+        event_color = event_data.get('event_color'),
     )
 
     #Save event to the database
@@ -132,6 +135,23 @@ def add_event():
 
     #Respond to client that request is good
     return jsonify({"message": "Event added successfully", "status": "success"})
+
+@flask_app.route('/delete-event', methods=['POST'])
+@login_required
+#@admin calendar thing
+def delete_event():
+    if not current_user.canCreateEvents:
+        flash('You do not have permission to edit the calendar.')
+        return redirect(url_for('calendar_view'))
+    event_id = request.form.get('event_id')
+    event_to_delete = Event.query.get(event_id)
+    if event_to_delete:
+        db.session.delete(event_to_delete)
+        db.session.commit()
+        return jsonify({"message": "Event deleted successfully", "status": "success"})
+    else:
+        return jsonify({"message": "Event not found", "status": "error"}), 404
+
 
 # Assume you have a folder named 'partials' within the 'templates' directory
 @flask_app.route('/partials/<content_name>.html')
@@ -163,13 +183,20 @@ def create_event():
         event = Event(
             title=form.title.data,
             description=form.description.data,
-            start_time=form.start_time.data,
-            end_time=form.end_time.data,
-            creator_id=current_user.id
+            start=datetime.strptime(form.start.data, '%Y-%m-%d %H:%M:%S'),
+            # Format depending on your form's datetime format
+            end=datetime.strptime(form.end.data, '%Y-%m-%d %H:%M:%S'),
+            creator_id=current_user.id,
+            event_type=form.event_type.data,
+            event_color=form.event_color.data  # Assuming your Event model has an event_color field
         )
         db.session.add(event)
-        db.session.commit()
-        flash('Event created successfully!')
+        try:
+            db.session.commit()
+            flash('Event created successfully!')
+        except Exception as e:
+            flash('An error occurred while saving the event: ' + str(e))
+            db.session.rollback()
         return redirect(url_for('calendar_view'))
 
     return render_template('create_event.html', form=form)
@@ -181,10 +208,13 @@ def fetch_events():
     events_data = []
     for event in events:
         events_data.append({
+            'id': event.id,
             'title': event.title,
             'start': event.start.isoformat(),
             'end': event.end.isoformat(),
             'description': event.description,
             'creator': event.creator.username,
+            'event_color': event.event_color,
+            'event_type': event.event_type,
         })
     return jsonify(events_data)

@@ -8,8 +8,8 @@ $(document).ready(function() {
             description: $('#eventDescription').val(),
             start: $('#eventStartDate').val(),
             end: $('#eventEndDate').val(),
-
-            // ... other event data ...
+            event_type: $('#eventType').val(), // Assuming you have an input with ID 'eventType'
+            event_color: $('#eventType option:selected').attr('data-color'),
         };
 
         $.ajax({
@@ -18,7 +18,11 @@ $(document).ready(function() {
             data: eventData,
             success: function(response) {
                 // Assuming 'calendar' is the FullCalendar instance you've initialized
-                calendar.addEvent(eventData);
+                calendar.addEvent({
+                    ...eventData,
+                    backgroundColor: eventData.event_color, // Set the color of the event
+                    borderColor: eventData.event_color // Optionally, you can set the border color as well
+                });
 
                 // Hide the modal
                 $('#eventModal').modal('hide');
@@ -39,3 +43,4 @@ $(document).ready(function() {
         });
     });
 });
+

@@ -7,14 +7,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <!-- Ensure the order of script imports if they depend on each other -->
     <!-- First include jQuery, then Popper.js, and then Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" defer></script> <!-- Popper.js is required for Bootstrap 4 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" defer></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script src="{{ url_for('templates', filename='js/main.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/submit_event.js') }}" defer></script>
 </head>
@@ -30,6 +33,9 @@
                 <div class="modal-body">
                     <!-- Event details will be inserted here -->
                 </div>
+                <div class="modal-footer">
+                    <button id="deleteEventButton" type="button" class="btn btn-danger">Delete Event</button>
+                </div>
             </div>
         </div>
     </div>
@@ -40,7 +46,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="eventModalLabel">Edit Calendar Event</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="eventForm">
@@ -59,18 +64,35 @@
                             <label for="eventEndDate" class="form-label">End Date</label>
                             <input type="datetime-local" class="form-control" id="eventEndDate" name="end" required>
                         </div>
-
-                        <label for="eventDescription">Description</label>
-                        <textarea id="eventDescription" required></textarea>
+                        <div class="form-group">
+                            <label for="eventType">Type of Event</label>
+                            <select id="eventType" name="event_type" class="form-control" required>
+                                <option value="Brotherhood Event" data-color="#0000FF">Brotherhood Event</option>
+                                <option value="Wet Event" data-color="#FFA500">Wet Event</option>
+                                <option value="Exchange" data-color="#FF0000">Exchange</option>
+                                <option value="Philanthrophy" data-color="#8000080">Philanthrophy</option>
+                                <option value="Programming" data-color="#008000">Programming</option>
+                                <option value="Community Service" data-color="#27ae60">Community Service</option>
+                                <option value="Other" data-color="#808080">Other</option>
+                                <!-- Add other options here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventDescription">Description</label>
+                            <textarea id="eventDescription" class="form-control" required></textarea>
+                        </div>
 
                         <!-- Add other fields similarly -->
 
                         <button type="submit" class="btn btn-primary">Submit Event</button>
+                        <!-- Other event details here -->
+
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
 
     <div class="header">
         <h1>My Website</h1>

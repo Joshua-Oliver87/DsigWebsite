@@ -1,3 +1,7 @@
 <!-- partials/calendar.html -->
+<script>
+    var canCreateEvents = {{ can_create_events | default(false) | tojson }};
+</script>
 <div id='calendar'></div>
 <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>

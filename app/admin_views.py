@@ -52,7 +52,7 @@ class UserAdminView(ModelView):
             query = User.query.filter(User.id.in_(ids))
             count = 0
             for user in query.all():
-                user.can_create_calendar_events = not user.can_create_calendar_events  # Toggle the permission
+                user.canCreateEvents = not user.canCreateEvents  # Toggle the permission
                 count += 1
             db.session.commit()
             flash(f'Event creation permission toggled for {count} users.')

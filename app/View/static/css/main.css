@@ -140,3 +140,36 @@ html, body {
     padding: 20px;
     overflow-y: auto;
 }
+
+.event-color{
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+}
+
+.color-option {
+    display: block;
+    width: 100%;
+    padding: 8px; /* Or any other padding you prefer */
+    box-sizing: border-box;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    display: none;  /* Hide the search box */
+}
+
+.select2-container--default .select2-results__option{
+    background-color: #000; /* Change this to your preferred highlighted background color */
+    color: #000; /* And this to your preferred text color for highlighted options */
+}
+
+/* Hide the edit button by default */
+.fc-editCalendarButton-button {
+    display: none;
+}
+
+/* Only show the button if the 'show-button' class is added */
+.show-button .fc-editCalendarButton-button {
+    display: inline-block;
+}
