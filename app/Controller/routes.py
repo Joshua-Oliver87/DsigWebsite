@@ -109,7 +109,7 @@ def make_admin(user_id):
 def calendar_view():
     events = Event.query.all()
     canCreateEvents = current_user.canCreateEvents
-    return render_template('partials/calendar.html', events=events, can_create_events=canCreateEvents)
+    return render_template('partials/calendar.html', can_create_events=canCreateEvents)
 
 @flask_app.route('/add-event', methods=['POST'])
 @login_required

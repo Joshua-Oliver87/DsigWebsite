@@ -1,6 +1,8 @@
 
 
 $(document).ready(function() {
+
+
     $('#link-calendar').on('click', function(e) {
         e.preventDefault();
         loadContent('calendar');
@@ -41,8 +43,9 @@ function loadContent(contentName) {
             $('#content-area').html(response);
             if (contentName === 'calendar') {
                 if (typeof initializeCalendar === "function") {
-                    initializeCalendar();
-
+                    if ($("#calendar").length) {
+                        initializeCalendar(canCreateEvents);
+                    }
                     // Reinitialize Select2 here
                     $('#eventType').select2({
                         templateResult: function(state) {

@@ -12,14 +12,20 @@
     <!-- Ensure the order of script imports if they depend on each other -->
     <!-- First include jQuery, then Popper.js, and then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        var canCreateEvents = {{ can_create_events | default(false) | tojson }};
+        console.log("canCreateEvents in calendar.html:", canCreateEvents);
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" defer></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
 
-    <script src="{{ url_for('templates', filename='js/main.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/submit_event.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}" ></script>
+    <script src="{{ url_for('static', filename='js/submit_event.js') }}" ></script>
 </head>
 <body>
     <div id="errorContainer"></div>

@@ -24,6 +24,8 @@ function displayEventDetails(event) {
 
 
 function initializeCalendar() {
+    console.log("canCreateEvents in calendar-initialize.js:", canCreateEvents);
+
     var calendarEl = document.getElementById('calendar');
     var calendarOptions = {
         headerToolbar: {
