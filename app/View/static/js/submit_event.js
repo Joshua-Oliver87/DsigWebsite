@@ -18,7 +18,7 @@ $(document).ready(function() {
             data: eventData,
             success: function(response) {
                 // Assuming 'calendar' is the FullCalendar instance you've initialized
-                calendar.addEvent({
+                window.calendar.addEvent({
                     ...eventData,
                     backgroundColor: eventData.event_color, // Set the color of the event
                     borderColor: eventData.event_color // Optionally, you can set the border color as well

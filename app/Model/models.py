@@ -20,6 +20,22 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 
+class Settings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    google_form_link = db.Column(db.String(255), nullable=False, default='')
+    @classmethod
+    def get_or_create(cls):
+        settings = cls.query.first()
+        if not settings:
+            settings = cls()
+            db.session.add(settings)
+            db.session.commit()
+        return settings
+    @classmethod
+    def get_google_form_link(cls):
+        settings = cls.query.first()
+        return settings.google_form_link if settings else ''
+
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -49,7 +65,7 @@ class EventForm(FlaskForm):
         ('#0000FF', 'Blue'),
         ('#FFA500', 'Orange'),
         ('#FF0000', 'Red'),
-        ('#800080', 'Purple'),
+        ('#80004C', 'Purple'), #this one
         ('#008000', 'Green'),
         ('#3498db', 'Light blue'),
         ('#808080', 'Grey'),

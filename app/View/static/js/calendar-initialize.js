@@ -2,7 +2,8 @@
 
 var calendar;
 
-function displayEventDetails(event) {
+
+function displayEventDetails(event, canCreateEvents) {
     // Update the modal with the event details
     $('#eventDetailModal .modal-title').text(event.title);
     let eventInfoHtml =
@@ -18,47 +19,51 @@ function displayEventDetails(event) {
     // Store event ID for deletion
     $('#deleteEventButton').data('eventId', event.id);
 
+    console.log("Can create events in initializor:", canCreateEvents);
+    if (canCreateEvents) {
+        $('#deleteEventButton').show();
+    } else {
+        $('#deleteEventButton').hide();
+    }
+
     // Show the modal
     $('#eventDetailModal').modal('show');
 }
 
-
-function initializeCalendar() {
+function initializeCalendar(canCreateEvents) {
     console.log("canCreateEvents in calendar-initialize.js:", canCreateEvents);
-
     var calendarEl = document.getElementById('calendar');
     var calendarOptions = {
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: canCreateEvents ? 'editCalendarButton' : '' // Conditionally display button
-        },
         initialView: 'dayGridMonth',
         events: '/fetch-events',
         eventClick: function(info) {
-            displayEventDetails(info.event);
+            displayEventDetails(info.event, canCreateEvents);
         },
         eventDidMount: function(info) {
             // Use this to set the background color for each event based on its properties
             if (info.event.extendedProps.event_color) {
                 info.el.style.backgroundColor = info.event.extendedProps.event_color;
             }
-        }
+        },
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: canCreateEvents ? 'editCalendarButton' : ''
+        },
+        customButtons: {}
     };
-    console.log(canCreateEvents);
+
+    // Only add the custom button if canCreateEvents is true
     if (canCreateEvents) {
-        calendarOptions.customButtons = {
-            editCalendarButton: {
-                text: 'Edit Calendar',
-                click: function() {
-                    openEventModal();
-                }
+        calendarOptions.customButtons.editCalendarButton = {
+            text: 'Edit Calendar',
+            click: function() {
+                openEventModal();
             }
         };
-        calendarOptions.headerToolbar.right = 'editCalendarButton';
     }
 
-    calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
+    window.calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
     calendar.render();
 }
 
@@ -80,13 +85,10 @@ function deleteEvent(eventId) {
     });
 }
 
-window.initializeCalendar = initializeCalendar;
+//window.initializeCalendar = initializeCalendar;
 
 function openEventModal(){
     $('#eventModal').modal('show');
 }
 
 
-$(document).ready(function() {
-    initializeCalendar();
-});

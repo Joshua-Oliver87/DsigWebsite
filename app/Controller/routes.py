@@ -1,10 +1,10 @@
 from datetime import datetime
-from flask import render_template, redirect, url_for, request, flash, get_flashed_messages, abort, jsonify
+from flask import render_template, redirect, url_for, request, flash, get_flashed_messages, abort, jsonify, current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
 from app import flask_app, db, login_manager
-from app.Model.models import User, Event, EventForm
+from app.Model.models import User, Event, EventForm, Settings
 from app.Controller.admin_decorator import admin_required
 
 @flask_app.route('/')
@@ -109,14 +109,19 @@ def make_admin(user_id):
 def calendar_view():
     events = Event.query.all()
     canCreateEvents = current_user.canCreateEvents
+    current_app.logger.info(f"Calendar View Accessed. canCreateEvents: {canCreateEvents}")
     return render_template('partials/calendar.html', can_create_events=canCreateEvents)
+
+
+@flask_app.route('/user-permissions')
+@login_required
+def user_permissions():
+    can_create_events = current_user.canCreateEvents
+    return jsonify({'canCreateEvents': can_create_events})
 
 @flask_app.route('/add-event', methods=['POST'])
 @login_required
 def add_event():
-    if not current_user.canCreateEvents:
-        flash('You do not have permission add events.')
-        return jsonify({"message": "Permission denied", "status": "error"}), 403
     #Get data from request
     event_data = request.form
     new_event = Event(
@@ -218,3 +223,26 @@ def fetch_events():
             'event_type': event.event_type,
         })
     return jsonify(events_data)
+@flask_app.route('/settings/google-form-link')
+def get_google_form_link():
+    google_form_link = Settings.get_google_form_link()
+    return jsonify({'google_form_link': google_form_link})
+
+
+@flask_app.route('/update-google-form', methods=['POST'])
+@login_required
+@admin_required
+def update_google_form():
+    new_link = request.form.get('googleFormLink')
+
+    # Logic to update the link in the database
+    # This depends on how you store this information. 
+    # For example, you might have a table or a specific row in a table for this link
+
+    # Assuming you have a Settings model with a field for google_form_link
+    settings = Settings.query.first()  # Or however you access your settings
+    settings.google_form_link = new_link
+    db.session.commit()
+
+    flash('Google Form link updated successfully.')
+    return redirect(url_for('admin_dashboard'))

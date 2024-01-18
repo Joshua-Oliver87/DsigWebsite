@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Settings</title>
+    <!-- Include Bootstrap CSS or other stylesheets if needed -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-3">
+        <h2>Update Google Form Link</h2>
+        <form method="POST" action="{{ url_for('update_google_form') }}">
+            {{ form.csrf_token }}  <!-- CSRF token for security -->
+            <div class="mb-3">
+                <label for="googleFormLink" class="form-label">Google Form Link</label>
+                <input type="text" class="form-control" id="googleFormLink" name="google_form_link" value="{{ settings.google_form_link or '' }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Update Link</button>
+        </form>
+    </div>
+
+    <!-- Include jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,12 +1,13 @@
-from flask_admin import Admin, AdminIndexView
+from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.actions import action
-from flask import flash
+from flask import flash, request
 from flask_login import current_user, LoginManager
 from sqlalchemy import func
-from .Model.models import User
+from .Model.models import User, Settings
 from .Model.database import db
 from flask_admin.model.template import macro
+
 
 # Custom view for the User model
 class MyModelView(ModelView):
@@ -69,4 +70,20 @@ class UserAdminView(ModelView):
         return current_user.is_authenticated and current_user.is_admin
 
 
+class SettingsView(ModelView):
+    # Only allow admins to access this view
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.is_admin
 
+    # Custom view for updating the Google Form link
+    @expose('/update-google-form', methods=['GET', 'POST'])
+    def update_google_form(self):
+        settings = Settings.get_or_create()  # Ensuring settings instance exists
+
+        if request.method == 'POST':
+            form_link = request.form.get('google_form_link')
+            settings.google_form_link = form_link
+            db.session.commit()
+            flash('Google Form link updated successfully.')
+
+        return self.render('settings_form.html', settings=settings)  # Updated path
