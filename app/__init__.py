@@ -3,6 +3,8 @@ from .Model.database import setup_db
 from .admin_views import MyAdminIndexView, LoginManager, Admin, UserAdminView
 import os
 from flask_babel import Babel
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -11,7 +13,18 @@ flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedi
 flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 flask_app.secret_key = os.urandom(24)
 
+#Excel sheet configuration with google drive:
+#SERVICE_ACCOUNT_FILE = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+#SCOPES = ['https://www.googleapis.com/auth/drive']
+#creds = service_account.Credentials.from_service_account_file(
+        #SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+#google_drive_service = build('drive', 'v3', credentials=creds)
+
+#flask_app.config['google_drive_service'] = google_drive_service
+
+#Babel configuration
 babel = Babel(flask_app)
+
 
 setup_db(flask_app)
 

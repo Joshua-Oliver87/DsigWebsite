@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import render_template, redirect, url_for, request, flash, get_flashed_messages, abort, jsonify, current_app
+from flask import render_template, redirect, url_for, request, flash, get_flashed_messages, abort, jsonify, current_app, session
 from flask_login import current_user, login_user, logout_user, login_required
 from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
@@ -236,7 +236,7 @@ def update_google_form():
     new_link = request.form.get('googleFormLink')
 
     # Logic to update the link in the database
-    # This depends on how you store this information. 
+    # This depends on how you store this information.
     # For example, you might have a table or a specific row in a table for this link
 
     # Assuming you have a Settings model with a field for google_form_link

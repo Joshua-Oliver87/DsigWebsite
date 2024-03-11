@@ -1,7 +1,6 @@
 /* This is to prevent the entire page from being scrollable */
 html, body {
     height: 100%;
-    overflow: hidden;
 }
 
 .alert {
@@ -63,13 +62,16 @@ html, body {
 }
 
 .header{
-    width: 100%
-    background-color: #007bff;
-    color: black;
+    position: absolute;
+    height: 75px;
+    top: 0;
+    left: 255px;
+    right: 0; /* Ensures the header stretches to the full width */
+    z-index: 1020; /* Higher than the sidebar */
     padding: 10px 20px;
+    color: black;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 1000;
 }
 
 .title {
@@ -115,30 +117,48 @@ html, body {
     /* Additional styles for register button if needed */
 }
 
-.container-fluid{
-    display: flex;
-    height: 100vh; /* full height */
-}
-
 .sidebar {
     position: fixed;
-    top: 0px; /* Adjust this if the header height changes */
+    display: flex; /* Enables flexbox */
+    flex-direction: column; /* Stacks children vertically */
+    align-items: center; /* Centers children horizontally */
     left: 0;
-    width: 250px; /* Adjust width as necessary */
     background-color: #f8f9fa;
     padding-top: 20px;
     z-index: 1000;
     border-right: 2px solid #dee2e6; /* This is your vertical line */
     overflow-y: auto;
-    height: calc(100% - 40px);
+    height: 100vh;
+}
+
+/* Spacing out buttons */
+.sidebar .nav-link {
+    margin-bottom: 100px; /* Adds space between buttons */
+    width: 100%;
+}
+
+/* Profile picture placeholder styles */
+.profile-picture {
+    width: 100px; /* Diameter of the profile picture circle */
+    height: 100px; /* Diameter of the profile picture circle */
+    border-radius: 50%; /* Makes it circular */
+    background-color: #adb5bd; /* Placeholder color, can be changed or replaced with an image */
+}
+
+.nav {
+    padding-top: 50px; /* Adjust this value to shift buttons down */
+    width: 100%; /* Ensures the nav takes full width of its parent */
+    /* ... other styles ... */
 }
 
 
 .main-content{
     margin-top: 60px;
     margin-left: 250px;
-    padding: 20px;
+    padding-top: 70px;
     overflow-y: auto;
+    position: relative;
+    width: calc(100% - 250px); /* Adjust the width according to the sidebar */
 }
 
 .event-color{
