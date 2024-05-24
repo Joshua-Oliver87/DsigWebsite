@@ -1,7 +1,59 @@
 /* This is to prevent the entire page from being scrollable */
 html, body {
     height: 100%;
+    width: 101%;
+    overflow-x: hidden;
 }
+
+/* Housepoints Section */
+.housepoints-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align items to the start (left side) */
+    margin-top: 50px;
+    margin-bottom: 50px;
+    margin-left: 20px; /* Adjust as needed to shift left */
+}
+
+.housepoints-header {
+    background-color: #E0BBFF; /* Adjust color as needed */
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 416px;
+}
+
+.housepoints-table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 416px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.housepoints-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.housepoints-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.housepoints-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.housepoints-table td:first-child {
+    font-weight: bold;
+}
+
 
 .alert {
   padding: 10px;
@@ -63,9 +115,10 @@ html, body {
 
 .header{
     position: absolute;
+    width: calc(100%-250px);
     height: 75px;
     top: 0;
-    left: 255px;
+    left: 20px;
     right: 0; /* Ensures the header stretches to the full width */
     z-index: 1020; /* Higher than the sidebar */
     padding: 10px 20px;
@@ -73,6 +126,34 @@ html, body {
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+.slogan {
+    margin-top: 95px; /* Adjust as needed to clear the header */
+    text-align: center;
+    /* Other styles */
+}
+
+/* Hide elements by default and only show them on the homepage */
+.homepage-only {
+    display: none;
+}
+
+.featured-image {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.featured-image img {
+    width: 100%;
+    height: auto;
+    max-height: 400px; /* Set a maximum height */
+    object-fit: cover; /* Ensures the image covers the container without distortion */
+    overflow-x: hidden;
+}
+
 
 .title {
     font-family: 'Inter', sans-serif;
@@ -129,6 +210,7 @@ html, body {
     border-right: 2px solid #dee2e6; /* This is your vertical line */
     overflow-y: auto;
     height: 100vh;
+    top: 0;
 }
 
 /* Spacing out buttons */

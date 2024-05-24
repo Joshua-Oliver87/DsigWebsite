@@ -7,7 +7,7 @@ from sqlalchemy import func
 from .Model.models import User, Settings
 from .Model.database import db
 from flask_admin.model.template import macro
-
+import pandas as pd
 
 # Custom view for the User model
 class MyModelView(ModelView):
