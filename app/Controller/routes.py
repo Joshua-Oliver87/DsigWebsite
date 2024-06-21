@@ -1,6 +1,5 @@
 from datetime import datetime
-import os
-from flask import render_template, redirect, url_for, request, flash, jsonify, current_app, abort
+from flask import render_template, redirect, url_for, request, flash, jsonify, current_app, abort, send_from_directory, g
 from flask_login import current_user, login_user, logout_user, login_required
 from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
@@ -8,8 +7,70 @@ from app import db, login_manager
 from app.Model.models import User, Event, EventForm, Settings
 from app.Controller.admin_decorator import admin_required
 from app.shared import data
+from sqlalchemy.exc import InvalidRequestError
+import os
+from werkzeug.utils import secure_filename
+import logging
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../UploadedProfilePictures')
+
+logging.basicConfig(level=logging.DEBUG)
+
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def register_routes(application):
+    application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+    @application.route('/upload_profile_picture', methods=['POST'])
+    @login_required
+    def upload_profile_picture():
+        if 'profile_picture' not in request.files:
+            logging.debug('No file part in request')
+            return jsonify({'success': False, 'message': 'No file part'})
+
+        file = request.files['profile_picture']
+        if file.filename == '':
+            logging.debug('No selected file')
+            return jsonify({'success': False, 'message': 'No selected file'})
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            logging.debug(f'Saving file to {filepath}')
+            file.save(filepath)
+
+            # Update the profile picture field
+            current_user.profile_picture = filename
+            logging.debug(f'Attempting to update profile picture to {filename} for user {current_user.id}')
+
+            try:
+                # Merge current_user into the current session
+                db.session.merge(current_user)
+                db.session.commit()
+                logging.debug(f'Successfully updated profile picture to {filename} for user {current_user.id}')
+            except Exception as e:
+                logging.error(f'Error committing to database: {e}')
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Database commit failed'})
+
+            # Confirm the profile picture is updated in the database
+            user_in_db = User.query.get(current_user.id)
+            logging.debug(f'Profile picture in database for user {user_in_db.id}: {user_in_db.profile_picture}')
+
+            image_url = url_for('uploaded_file', filename=filename)
+            return jsonify({'success': True, 'image_url': image_url})
+
+        logging.debug('File not allowed')
+        return jsonify({'success': False, 'message': 'File not allowed'})
+
+    @application.route('/uploads/<filename>')
+    def uploaded_file(filename):
+        return send_from_directory(application.config['UPLOAD_FOLDER'], filename)
+
     @application.route('/')
     def welcome():
         return render_template('welcome.html')
@@ -28,10 +89,6 @@ def register_routes(application):
             username = request.form['username']
             password = request.form['password']
 
-            if not email.endswith('@wsu.edu'):
-                flash('Please use your WSU email address to register.')
-                return redirect(url_for('login'))
-
             existing_user = User.query.filter_by(username=username).first()
             if existing_user:
                 flash('Username already taken. Please choose a different one.')
@@ -42,7 +99,7 @@ def register_routes(application):
             new_user.is_approved = False
             db.session.add(new_user)
             db.session.commit()
-            flash('Registration pending.')
+            flash('Registration pending, please wait for approval from admin', 'info')
             return redirect(url_for('login'))
 
         return render_template('register.html')
@@ -63,12 +120,33 @@ def register_routes(application):
                     flash("Your account is not approved yet. Please wait for an admin to approve it.")
                     return redirect(url_for('login'))
                 login_user(user)
-                flash("Logged in successfully.")
                 return redirect(url_for('user_homepage'))
             else:
                 flash("Invalid username or password.")
 
         return render_template('login.html')
+
+    @application.route('/fetch-todays-events')
+    @login_required
+    def fetch_todays_events():
+        today = datetime.now().date()
+        start_of_day = datetime.combine(today, datetime.min.time())
+        end_of_day = datetime.combine(today, datetime.max.time())
+
+        events = Event.query.filter(Event.start <= end_of_day, Event.end >= start_of_day).all()
+        events_data = []
+        for event in events:
+            events_data.append({
+                'id': event.id,
+                'title': event.title,
+                'start': event.start.strftime('%H:%M'),
+                'end': event.end.strftime('%H:%M'),
+                'description': event.description,
+                'creator': event.creator.username,
+                'event_color': event.event_color,
+                'event_type': event.event_type,
+            })
+        return jsonify(events_data)
 
     @application.route('/logout')
     def logout():
@@ -78,8 +156,37 @@ def register_routes(application):
     @application.route('/user_homepage')
     @login_required
     def user_homepage():
-        print("Data being passed to template:", data)
-        return render_template('user_homepage.html', data=data)
+        user_email = current_user.email
+        user_data = data.get(user_email, {})
+        total_points = sum(
+            int(user_data.get(category, 0) or 0)
+            for category in
+            ['Brotherhoods', 'Social Events', 'Philanthropy', 'Recruitment Events', 'Programming', 'Community Service',
+             'Other']
+        )
+        user_data['Total'] = total_points
+        todays_events = fetch_todays_events().json
+        print("Data being passed to template:", user_data)
+        return render_template('user_homepage.html', data=user_data, events=todays_events, page='homepage')
+
+    @application.route('/fetch-event-details/<int:event_id>')
+    @login_required
+    def fetch_event_details(event_id):
+        event = Event.query.get(event_id)
+        if event:
+            event_data = {
+                'id': event.id,
+                'title': event.title,
+                'start': event.start.isoformat(),
+                'end': event.end.isoformat(),
+                'description': event.description,
+                'creator': event.creator.username,
+                'event_color': event.event_color,
+                'event_type': event.event_type,
+            }
+            return jsonify(event_data)
+        else:
+            return jsonify({'error': 'Event not found'}), 404
 
     @application.route('/admin/dashboard')
     @login_required
@@ -129,7 +236,7 @@ def register_routes(application):
         )
         db.session.add(new_event)
         db.session.commit()
-        return jsonify({"message": "Event added successfully", "status": "success"})
+        return jsonify({"message": "Event added successfully", "status": "success", "event_id": new_event.id})
 
     @application.route('/delete-event', methods=['POST'])
     @login_required
@@ -137,14 +244,29 @@ def register_routes(application):
         if not current_user.canCreateEvents:
             flash('You do not have permission to edit the calendar.')
             return redirect(url_for('calendar_view'))
+
         event_id = request.form.get('event_id')
-        event_to_delete = Event.query.get(event_id)
-        if event_to_delete:
-            db.session.delete(event_to_delete)
-            db.session.commit()
-            return jsonify({"message": "Event deleted successfully", "status": "success"})
-        else:
-            return jsonify({"message": "Event not found", "status": "error"}), 404
+
+        try:
+            # Use a fresh session context to query and delete the event
+            event_to_delete = db.session.query(Event).get(event_id)
+            if (event_to_delete):
+                db.session.delete(event_to_delete)
+                db.session.commit()
+                current_app.logger.info(f"Deleted event with ID: {event_id}")
+                return jsonify({"message": "Event deleted successfully", "status": "success"})
+            else:
+                current_app.logger.error(f"Event with ID: {event_id} not found.")
+                return jsonify({"message": "Event not found", "status": "error"}), 404
+        except InvalidRequestError as e:
+            current_app.logger.error(f"Session error: {str(e)}")
+            db.session.rollback()
+            db.session.remove()  # Ensure the current session is removed and reset
+            return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error deleting event with ID: {event_id}. Error: {str(e)}")
+            return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
 
     @application.route('/partials/<content_name>.html')
     @login_required
@@ -175,7 +297,7 @@ def register_routes(application):
                 end=datetime.strptime(form.end.data, '%Y-%m-%d %H:%M:%S'),
                 creator_id=current_user.id,
                 event_type=form.event_type.data,
-                event_color=form.event_color.data  # Assuming your Event model has an event_color field
+                event_color=form.event_color.data
             )
             db.session.add(event)
             try:
@@ -188,42 +310,42 @@ def register_routes(application):
 
         return render_template('create_event.html', form=form)
 
-        @application.route('/fetch-events')
-        @login_required
-        def fetch_events():
-            events = Event.query.all()
-            events_data = []
-            for event in events:
-                events_data.append({
-                    'id': event.id,
-                    'title': event.title,
-                    'start': event.start.isoformat(),
-                    'end': event.end.isoformat(),
-                    'description': event.description,
-                    'creator': event.creator.username,
-                    'event_color': event.event_color,
-                    'event_type': event.event_type,
-                })
-            return jsonify(events_data)
+    @application.route('/fetch-events')
+    @login_required
+    def fetch_events():
+        events = Event.query.all()
+        events_data = []
+        for event in events:
+            events_data.append({
+                'id': event.id,
+                'title': event.title,
+                'start': event.start.isoformat(),
+                'end': event.end.isoformat(),
+                'description': event.description,
+                'creator': event.creator.username,
+                'event_color': event.event_color,
+                'event_type': event.event_type,
+            })
+        return jsonify(events_data)
 
-        @application.route('/settings/google-form-link')
-        def get_google_form_link():
-            google_form_link = Settings.get_google_form_link()
-            return jsonify({'google_form_link': google_form_link})
+    @application.route('/settings/google-form-link')
+    def get_google_form_link():
+        google_form_link = "https://docs.google.com/forms/d/e/1FAIpQLSeOjs5WVTtI2n2jXxi0duBsEUF10bR-UdW81gRtAvODBGL4Dw/viewform?usp=sf_link"
+        return jsonify({'google_form_link': google_form_link})
 
-        @application.route('/update-google-form', methods=['POST'])
-        @login_required
-        @admin_required
-        def update_google_form():
-            new_link = request.form.get('googleFormLink')
-            settings = Settings.query.first()
-            settings.google_form_link = new_link
-            db.session.commit()
-            flash('Google Form link updated successfully.')
-            return redirect(url_for('admin_dashboard'))
+    @application.route('/update-google-form', methods=['POST'])
+    @login_required
+    @admin_required
+    def update_google_form():
+        new_link = request.form.get('googleFormLink')
+        settings = Settings.query.first()
+        settings.google_form_link = new_link
+        db.session.commit()
+        flash('Google Form link updated successfully.')
+        return redirect(url_for('admin_dashboard'))
 
-    def register_routes(app):
-        with app.app_context():
-            register_routes(app)
-
+    @application.route('/housepoint-form')
+    @login_required
+    def housepoint_form():
+        return render_template('user_homepage.html', page='housepoint-form')
 

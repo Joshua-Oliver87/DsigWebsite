@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" defer></script>
@@ -15,263 +16,51 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/submit_event.js') }}"></script>
     <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}" defer></script>
     <script>
         var canCreateEvents = {{ can_create_events | default(false) | tojson }};
         console.log("canCreateEvents in user_homepage.html:", canCreateEvents);
     </script>
-    <style>
-        /* This is to prevent the entire page from being scrollable */
-        html, body {
-            height: 100%;
-        }
-
-        .alert {
-          padding: 10px;
-          background-color: #f44336; /* Red */
-          color: white;
-          margin-bottom: 15px;
-        }
-
-        .nav {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .nav-item {
-            display: block;
-        }
-
-        .nav-link {
-            display: block;
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #333;
-            transition: background-color 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adds a shadow */
-            border-radius: 5px; /* Rounded corners for buttons */
-            margin-bottom: 5px; /* Adds space between buttons */
-        }
-
-        .nav-link:hover, .nav-link:focus {
-            background-color: #e9ecef;
-            color: #007bff;
-            text-decoration: none; /*no underlines on hover */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: static;
-            }
-            .main-content {
-                margin-left: 0;
-            }
-        }
-
-        .container {
-            background-image: url('../static/images/welcome_background.png');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center center;
-            height: 100vh; /* Or the height of your image */
-            width: 100vw; /* Or the width of your image */
-            position: relative; /* Needed for absolute positioning of child elements */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header {
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .slogan {
-            margin-top: 95px; /* Adjust as needed to clear the header */
-            text-align: center;
-            /* Other styles */
-        }
-
-        /* Hide elements by default and only show them on the homepage */
-        .homepage-only {
-            display: none;
-        }
-
-        .title {
-            font-family: 'Inter', sans-serif;
-            font-size: 100px;
-            color: #DB37F5;
-            font-weight: 700;
-            line-height: 1;
-            margin: 0; /* Removes default margin */
-            padding-top: 10vh; /* Adjust as needed */
-        }
-
-        .subtitle {
-            font-family: 'Inter', sans-serif;
-            font-size: 30px; /* Adjust as needed */
-            color: black;
-            font-weight: 700;
-            line-height: 1;
-            margin: 0; /* Removes default margin */
-        }
-
-        .button {
-            display: inline-block;
-            margin: 1em auto; /* Center the buttons horizontally */
-            padding: 1em 2em;
-            background-color: #2DA530; /* Replace with your actual button color */
-            color: white;
-            text-decoration: none;
-            border: none;
-            border-radius: 25px;
-            font-size: 1.5em;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .login-button {
-          top: 65%;
-        }
-
-        .register-button {
-            top: 80%;
-            /* Additional styles for register button if needed */
-        }
-
-        .sidebar {
-            position: fixed;
-            display: flex; /* Enables flexbox */
-            flex-direction: column; /* Stacks children vertically */
-            align-items: center; /* Centers children horizontally */
-            left: 0;
-            background-color: #f8f9fa;
-            padding-top: 20px;
-            z-index: 1000;
-            border-right: 2px solid #dee2e6; /* This is your vertical line */
-            overflow-y: auto;
-            height: 100vh;
-            top: 0;
-        }
-
-        /* Spacing out buttons */
-        .sidebar .nav-link {
-            margin-bottom: 100px; /* Adds space between buttons */
-            width: 100%;
-        }
-
-        /* Profile picture placeholder styles */
-        .profile-picture {
-            width: 100px; /* Diameter of the profile picture circle */
-            height: 100px; /* Diameter of the profile picture circle */
-            border-radius: 50%; /* Makes it circular */
-            background-color: #adb5bd; /* Placeholder color, can be changed or replaced with an image */
-        }
-
-        .nav {
-            padding-top: 50px; /* Adjust this value to shift buttons down */
-            width: 100%; /* Ensures the nav takes full width of its parent */
-            /* ... other styles ... */
-        }
-
-        .event-color {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            margin-right: 5px;
-        }
-
-        .color-option {
-            display: block;
-            width: 100%;
-            padding: 8px; /* Or any other padding you prefer */
-            box-sizing: border-box;
-        }
-
-        .select2-container--default .select2-search--dropdown .select2-search__field {
-            display: none;  /* Hide the search box */
-        }
-
-        .select2-container--default .select2-results__option {
-            background-color: #000; /* Change this to your preferred highlighted background color */
-            color: #000; /* And this to your preferred text color for highlighted options */
-        }
-
-        /* Hide the edit button by default */
-        .fc-editCalendarButton-button {
-            display: none;
-        }
-
-        /* Only show the button if the 'show-button' class is added */
-        .show-button .fc-editCalendarButton-button {
-            display: inline-block;
-        }
-
-         .housepoints-section {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start; /* Align items to the start (left side) */
-            margin-top: 20px;
-            margin-bottom: 50px;
-            margin-left: 20px; /* Adjust as needed to shift left */
-        }
-
-        .housepoints-header {
-            background-color: #E0BBFF; /* Adjust color as needed */
-            border-radius: 10px;
-            padding: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 416px;
-        }
-
-        .housepoints-table {
-            border-collapse: collapse;
-            width: 100%;
-            max-width: 416px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: #ffffff;
-        }
-
-        .housepoints-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-
-        .housepoints-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .housepoints-table tr:hover {
-            background-color: #f1f1f1;
-        }
-        .housepoints-table td:first-child {
-            font-weight: bold;
-        }
-
-    </style>
 </head>
-<body>
+<body class="{% if page == 'housepoint-form' %}housepoint-form-page{% elif page == 'calendar' %}calendar-page{% elif page == 'dashboard' %}dashboard-page{% endif %}">
+    <div id="calendar-header" style="display: none;">
+        <h1 class="fancy-header">All Events</h1>
+    </div>
+    <div class="key-container" style="display: none;">
+        <div class="key-item">
+            <span class="key-color" style="background-color: #1E90FF;"></span> Brotherhood
+        </div>
+        <div class="key-item">
+            <span class="key-color" style="background-color: #FF6347;"></span> Social
+        </div>
+        <div class="key-item">
+            <span class="key-color" style="background-color: #32CD32;"></span> Philanthropy
+        </div>
+        <div class="key-item">
+            <span class="key-color" style="background-color: #FFD700;"></span> Recruitment
+        </div>
+        <div class="key-item">
+            <span class="key-color" style="background-color: #8A2BE2;"></span> Programming
+        </div>
+        <div class="key-item">
+            <span class="key-color" style="background-color: #FF69B4;"></span> Community Service
+        </div>
+        <div class="key-item">
+            <span class="key-color" style="background-color: #A9A9A9;"></span> Other
+        </div>
+    </div>
     <div id="errorContainer"></div>
     <div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="eventDetailModalLabel">Event Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Event details will be inserted here -->
                 </div>
                 <div class="modal-footer">
                     <button id="deleteEventButton" type="button" class="btn btn-danger">Delete Event</button>
@@ -280,54 +69,69 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <!-- Modal for creating/editing events -->
+    <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="eventModalLabel">Edit Calendar Event</h5>
+                    <h5 class="modal-title" id="editEventModalLabel">Edit Calendar Event</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="eventForm">
-                        <!-- Event Name -->
-                        <div class="mb-3">
-                            <label for="eventName" class="form-label">Name of Event</label>
-                            <input type="text" class="form-control" id="eventName" name="title" required>
-                        </div>
-                        <!-- Event Date -->
-                        <div class = "mb-3">
-                            <label for="eventStartDate" class="form-label">Start Date</label>
-                            <input type="datetime-local" class="form-control" id="eventStartDate" name="start" required>
-                        </div>
-                        <!--Event end date -->
-                         <div class = "mb-3">
-                            <label for="eventEndDate" class="form-label">End Date</label>
-                            <input type="datetime-local" class="form-control" id="eventEndDate" name="end" required>
-                        </div>
                         <div class="form-group">
-                            <label for="eventType">Type of Event</label>
-                            <select id="eventType" name="event_type" class="form-control" required>
-                                <option value="Brotherhood Event" data-color="#0000FF">Brotherhood Event</option>
-                                <option value="Wet Event" data-color="#FFA500">Wet Event</option>
-                                <option value="Exchange" data-color="#FF0000">Exchange</option>
-                                <option value="Philanthropy" data-color="#800080">Philanthropy</option>
-                                <option value="Programming" data-color="#008000">Programming</option>
-                                <option value="Community Service" data-color="#27ae60">Community Service</option>
-                                <option value="Other" data-color="#808080">Other</option>
-                                <!-- Add other options here -->
-                            </select>
+                            <label for="eventName">Event Name</label>
+                            <input type="text" id="eventName" class="form-control" required>
                         </div>
                         <div class="form-group">
                             <label for="eventDescription">Description</label>
                             <textarea id="eventDescription" class="form-control" required></textarea>
                         </div>
-
-                        <!-- Add other fields similarly -->
-
+                        <div class="form-group">
+                            <label for="eventStartDate">Start Date & Time</label>
+                            <input type="datetime-local" id="eventStartDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventEndDate">End Date & Time</label>
+                            <input type="datetime-local" id="eventEndDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="eventType">Event Type</label>
+                            <select id="eventType" class="form-control" required>
+                                <option value="brotherhood" data-color="#1E90FF">Brotherhood</option>
+                                <option value="social" data-color="#FF6347">Social</option>
+                                <option value="philanthropy" data-color="#32CD32">Philanthropy</option>
+                                <option value="recruitment" data-color="#FFD700">Recruitment</option>
+                                <option value="programming" data-color="#8A2BE2">Programming</option>
+                                <option value="community_service" data-color="#FF69B4">Community Service</option>
+                                <option value="other" data-color="#A9A9A9">Other</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Submit Event</button>
-                        <!-- Other event details here -->
-
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing event details -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h2 id="eventTitle"></h2>
+                    <p><strong>Start:</strong> <span id="eventStart"></span></p>
+                    <p><strong>End:</strong> <span id="eventEnd"></span></p>
+                    <p><strong>Description:</strong> <span id="eventDetailsDescription"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -338,75 +142,72 @@
             <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 sidebar">
                 <!-- Your sidebar content -->
-                <div class="profile-picture"></div>
+                <div class="profile-picture-container">
+                    <img id="profilePicture" src="{{ url_for('uploaded_file', filename=current_user.profile_picture) if current_user.profile_picture else url_for('static', filename='images/defaultProfilePicture.jpeg') }}" alt="Profile Picture" class="profile-picture">
+                    <a href="#" id="editProfilePicture">Edit Profile Picture</a>
+                    <input type="file" id="uploadProfilePicture" style="display: none;" accept="image/*">
+                </div>
+
+                <!-- User Info -->
+                <div class="user-info">
+                    <span id="userId">{{ user_id }}</span>
+                </div>
                 <ul class="nav flex-column">
                     <li class="nav-item"><a href="#" class="nav-link" id="link-dashboard">Dashboard</a></li>
                     <li class="nav-item"><a href="#" class="nav-link" id="link-calendar">Calendar</a></li>
                     <li class="nav-item"><a href="#" class="nav-link" id="link-Housepoint">Housepoint Form</a></li>
-                    <!-- Add other tabs here -->
                 </ul>
+                <!-- Log Out Button -->
+                <div class="logout-container">
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger">Log Out</a>
+                </div>
             </div>
             <!-- Main content -->
             <div class="col-md-9 col-lg-10 main-content">
-                <div class="header">
-                    <h1>Welcome User!</h1>
-                </div>
-                <div class="featured-image">
-                    <img src="{{ url_for('static', filename='images/DeltaSigmaPhi.png') }}" alt="Delta Sigma Phi">
-                </div>
-                <div class="housepoints-section">
-                    <div class="housepoints-header">Housepoints</div>
-                    <table class="housepoints-table">
-                        <tr>
-                            <td>Brotherhood Event</td>
-                            <td>{{ data['Brotherhood Event'] if data else 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Wet event</td>
-                            <td>{{ data['Wet Event'] if data else 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Exchanges</td>
-                            <td>{{ data['Exchanges'] if data else 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Philanthropy</td>
-                            <td>{{ data['Philanthropy'] if data else 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Programming</td>
-                            <td>{{ data['Programming'] if data else 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <td>Community Service</td>
-                            <td>{{ data['Community Service'] if data else 'N/A' }}</td>
-                        </tr>
-                    </table>
-                </div>
-                <footer class="main-footer">
-                    <!-- Footer content -->
-                </footer>
-                <div id='content-area'>
-                    <!-- Default content or Welcome Message will be loaded here -->
-                </div>
-                <!-- Calendar Container -->
-                <div id="calendar" style="display: none;">
-                    <!-- Calendar content will be loaded here -->
-                </div>
-
-                {% if current_user.is_admin %}
-                    <!-- Google Form Container -->
-                    <div id="googleFormContainer" style="display: none;">
-                        <iframe id="googleFormIframe" style="width: 100%; height: 600px; border: none;" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-                        <div class="update-google-form-link">
-                            <input type="text" id="newGoogleFormLink" placeholder="Enter new Google Form link">
-                            <button id="updateGoogleFormLinkButton">Update Link</button>
-                            <div id="updateStatus"></div>
+                <div id="homepage-content">
+                    <div class="welcome-header">
+                        <h1>Welcome, {{ current_user.username }}!</h1>
+                    </div>
+                    <div class="featured-image">
+                        <img src="{{ url_for('static', filename='images/DeltaSigmaPhi.png') }}" alt="Delta Sigma Phi">
+                    </div>
+                    <div class="housepoints-and-events">
+                        <div class="housepoints-section">
+                            <div class="housepoints-header">Housepoints</div>
+                            <table class="housepoints-table">
+                                <tr><td>Brotherhood Events</td><td>{{ data['Brotherhoods'] }}</td></tr>
+                                <tr><td>Social Events</td><td>{{ data['Social Events'] }}</td></tr>
+                                <tr><td>Philanthropy</td><td>{{ data['Philanthropy'] }}</td></tr>
+                                <tr><td>Recruitment</td><td>{{ data['Recruitment Events'] }}</td></tr>
+                                <tr><td>Programmings</td><td>{{ data['Programming'] }}</td></tr>
+                                <tr><td>Community Service</td><td>{{ data['Community Service'] }}</td></tr>
+                                <tr><td>Other</td><td>{{ data['Other'] }}</td></tr>
+                                <tr><td>Total</td><td>{{ data['Total'] }}</td></tr>
+                            </table>
+                        </div>
+                        <div class="todays-events-section">
+                            <div class="todays-events-header">Today's Events</div>
+                            <div class="events-list">
+                                {% for event in events %}
+                                <div class="event-item" data-event-id="{{ event.id }}">
+                                    <span class="event-title">{{ event.title }}</span>
+                                </div>
+                                {% else %}
+                                <div class="no-events">No events scheduled for today.</div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
-                {% endif %}
+                </div>
+                <div id="googleFormContainer" class="google-form-page" style="display: none;">
+                    <div class="google-form-title">Miscellaneous Housepoints Form</div>
+                    <p>To submit activities/events/other things for housepoints that do not fit in the categories we already have.</p>
+                    <a id="googleFormLink" href="https://docs.google.com/forms/d/e/1FAIpQLSeOjs5WVTtI2n2jXxi0duBsEUF10bR-UdW81gRtAvODBGL4Dw/viewform?usp=sf_link" target="_blank" class="google-form-button">Fill out form</a>
+                </div>
+                <div id="calendar"></div>
             </div>
         </div>
     </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

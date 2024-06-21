@@ -1,34 +1,29 @@
-// calendar_initialize.js
-
 var calendar;
 
+function openEventModal() {
+    $('#editEventModal').modal('show');
+}
 
 function displayEventDetails(event, canCreateEvents) {
-    // Update the modal with the event details
     $('#eventDetailModal .modal-title').text(event.title);
     let eventInfoHtml =
-        "Description: " + event.extendedProps.description + "<br>" +
-        "Start: " + event.start.toLocaleString() + "<br>" +
-        "End: " + event.end.toLocaleString() + "<br>" +
-        "Creator: " + event.extendedProps.creator + "<br>" +
-        "Type of Event: " + event.extendedProps.event_type
-    ;
-
+        "<p><strong>Description:</strong> " + event.extendedProps.description + "</p>" +
+        "<p><strong>Start:</strong> " + event.start.toLocaleString() + "</p>" +
+        "<p><strong>End:</strong> " + event.end.toLocaleString() + "</p>" +
+        "<p><strong>Creator:</strong> " + event.extendedProps.creator + "</p>" +
+        "<p><strong>Type of Event:</strong> " + event.extendedProps.event_type + "</p>";
     $('#eventDetailModal .modal-body').html(eventInfoHtml);
-
-    // Store event ID for deletion
     $('#deleteEventButton').data('eventId', event.id);
 
-    console.log("Can create events in initializor:", canCreateEvents);
     if (canCreateEvents) {
         $('#deleteEventButton').show();
     } else {
         $('#deleteEventButton').hide();
     }
 
-    // Show the modal
     $('#eventDetailModal').modal('show');
 }
+
 
 function initializeCalendar(canCreateEvents) {
     console.log("canCreateEvents in calendar-initialize.js:", canCreateEvents);
@@ -40,7 +35,6 @@ function initializeCalendar(canCreateEvents) {
             displayEventDetails(info.event, canCreateEvents);
         },
         eventDidMount: function(info) {
-            // Use this to set the background color for each event based on its properties
             if (info.event.extendedProps.event_color) {
                 info.el.style.backgroundColor = info.event.extendedProps.event_color;
             }
@@ -50,10 +44,11 @@ function initializeCalendar(canCreateEvents) {
             center: 'title',
             right: canCreateEvents ? 'editCalendarButton' : ''
         },
-        customButtons: {}
+        customButtons: {},
+        contentHeight: 'auto',  // Adjust height to fit content
+        aspectRatio: 2,  // Adjust aspect ratio to zoom out
     };
 
-    // Only add the custom button if canCreateEvents is true
     if (canCreateEvents) {
         calendarOptions.customButtons.editCalendarButton = {
             text: 'Edit Calendar',
@@ -67,28 +62,53 @@ function initializeCalendar(canCreateEvents) {
     calendar.render();
 }
 
+
+
+
+
 function deleteEvent(eventId) {
-    // Logic to delete the event, perhaps with an AJAX call to the server
-    // After deletion, close the modal and refresh the calendar
     $.ajax({
         url: '/delete-event',
         type: 'POST',
         data: { event_id: eventId },
         success: function(response) {
-            calendar.getEventById(eventId).remove();
-            $('#eventDetailModal').modal('hide');
+            if (response.status === 'success') {
+                calendar.getEventById(eventId).remove();
+                $('#eventDetailModal').modal('hide');
+                fetchTodaysEvents();  // Refresh today's events
+            } else {
+                console.error('Failed to delete event:', response.message);
+            }
         },
         error: function(xhr, status, error) {
-            // Handle errors here
             console.error('Failed to delete event:', error);
         }
     });
 }
 
-//window.initializeCalendar = initializeCalendar;
 
-function openEventModal(){
-    $('#eventModal').modal('show');
+function fetchTodaysEvents() {
+    $.ajax({
+        url: '/fetch-todays-events',
+        type: 'GET',
+        success: function(events) {
+            var eventsList = $('.events-list');
+            eventsList.empty();
+            events.forEach(event => {
+                eventsList.append(
+                    `<div class="event-item" data-event-id="${event.id}">
+                        <span class="event-title">${event.title}</span>
+                    </div>`
+                );
+            });
+            if (events.length === 0) {
+                eventsList.append('<div class="no-events">No events scheduled for today.</div>');
+            }
+        },
+        error: function() {
+            console.error('Error fetching today\'s events');
+        }
+    });
 }
 
 

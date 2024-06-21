@@ -1,42 +1,58 @@
-<!-- Add this inside the <head> tag of your login.html -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-
-<!-- templates/login.html -->
-<div class="login-container">
-    <div class="login-header">
-        <h2>Hi, Welcome!</h2>
-        <!-- Add your welcome image here if needed -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <script>
+        // Function to hide flash messages after 3 seconds
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                var flashMessages = document.querySelectorAll('.flash-messages .alert');
+                flashMessages.forEach(function(message) {
+                    message.style.display = 'none';
+                });
+            }, 3000);
+        });
+    </script>
+</head>
+<body>
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash-messages">
-          {% for message in messages %}
-            <div class="alert">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-
-    <form action="{{ url_for('login') }}" method="post">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Your username" required>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Password" required>
-
-        <div class="remember-me">
-            <input type="checkbox" id="remember" name="remember">
-            <label for="remember">Remember me</label>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Hi, Welcome!</h2>
         </div>
 
-        <button type="submit" class="login-button">Log in</button>
+        <form action="{{ url_for('login') }}" method="post">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Your username" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Password" required>
 
-        <div class="alternative-login">
-            <!-- Insert social media login options here -->
-        </div>
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember me</label>
+            </div>
 
-        <div class="signup-prompt">
-            Don’t have an account? <a href="{{ url_for('register') }}">Sign up</a>
-        </div>
-    </form>
-</div>
+            <button type="submit" class="login-button">Log in</button>
+
+            <div class="alternative-login">
+                <!-- Insert social media login options here -->
+            </div>
+
+            <div class="signup-prompt">
+                Don’t have an account? <a href="{{ url_for('register') }}">Sign up</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

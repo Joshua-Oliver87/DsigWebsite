@@ -1,23 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 </head>
 <body>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    <form method="post" action="{{ url_for('register') }}">
-        Username: <input type="text" name="username" placeholder="Username" required><br>
-        Email: <input type="email" name="email" placeholder="name@wsu.edu" required pattern=".+@wsu\.edu$" title="Please use a WSU email"><br>
-        Password: <input type="password" name="password" required><br>
-        <input type="submit" value="Register">
-    </form>
+    <div class="register-container">
+        <div class="register-header">
+            <h2>Create an Account</h2>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="alert">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('register') }}">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Username" required>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <button type="submit" class="register-button">Register</button>
+        </form>
+
+        <div class="login-prompt">
+            Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+        </div>
+    </div>
 </body>
 </html>

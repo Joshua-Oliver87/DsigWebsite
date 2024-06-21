@@ -1,91 +1,126 @@
 $(document).ready(function() {
-    // Function to load and initialize the calendar
     var calendarInitialized = false;
+    var currentPage = 'dashboard';  // Default to 'dashboard'
 
-    function toggleVisibility(showCalendar) {
-        if (showCalendar) {
-            $('#googleFormContainer').hide();
-            if (!calendarInitialized) {
-                loadAndInitializeCalendar();
-            } else {
-                $('#calendar').show();
-            }
-        } else {
-            $('#calendar').hide();
-            loadGoogleFormLink();
-            $('#googleFormContainer').show();
-        }
-    }
+    $('#editProfilePicture').on('click', function(e) {
+        e.preventDefault();
+        $('#uploadProfilePicture').click();
+    });
 
-    $('#updateGoogleFormLinkButton').on('click', function() {
-        var newLink = $('#newGoogleFormLink').val();
+    $('#uploadProfilePicture').on('change', function() {
+        var formData = new FormData();
+        formData.append('profile_picture', $('#uploadProfilePicture')[0].files[0]);
+
         $.ajax({
-            url: '/update-google-form', // The Flask route
+            url: '/upload_profile_picture',
             type: 'POST',
-            data: { googleFormLink: newLink },
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(response) {
-                $('#updateStatus').text(response.message).css('color', 'green');
+                if (response.success) {
+                    $('#profilePicture').attr('src', response.image_url);
+                } else {
+                    alert(response.message);
+                }
             },
             error: function() {
-                $('#updateStatus').text('Error updating the link').css('color', 'red');
+                alert('An error occurred while uploading the profile picture.');
             }
         });
     });
 
+    function setPage(page) {
+        currentPage = page;
+        $('body').attr('class', page === 'housepoint-form' ? 'housepoint-form-page' : '');
+    }
+
     function loadAndInitializeCalendar() {
         if (!calendarInitialized) {
+            console.log('Loading and initializing calendar');
             $.ajax({
                 url: '/partials/calendar.html',
                 type: 'GET',
                 success: function(response) {
-                    $('#content-area').html(response);
+                    $('#calendar').html(response);
                     fetchUserPermissions();
                     reinitializeSelect2();
                     attachEventDeletionHandler();
                     calendarInitialized = true;
-                    $('#calendar').show(); // Ensure the calendar container is visible
+                    $('#calendar').show();
                 },
                 error: function() {
                     console.error('Error loading calendar content');
                 }
             });
+        } else {
+            $('#calendar').show();
         }
     }
 
-    function hideHomepageContent() {
-        $('.homepage-only').hide(); // Hide the homepage-specific content
+    function toggleVisibility(showCalendar) {
+        console.log('Toggling visibility, showCalendar:', showCalendar);
+        if (showCalendar) {
+            $('#googleFormContainer').hide();
+            $('#calendar').show();
+            $('#homepage-content').hide();
+            $('#calendar-header').show();
+            $('.key-container').show();
+        } else {
+            $('#calendar').hide();
+            $('#calendar-header').hide();
+            $('.key-container').hide();
+            $('#homepage-content').show().css('margin-top', '0');  // Reset margin-top
+            $('#googleFormContainer').hide();
+
+             resetMainContentStyles();
+        }
     }
 
-     function attachEventHandlers() {
-         $('#link-Housepoint').on('click', function(e) {
+    function resetMainContentStyles() {
+        const mainContent = document.querySelector('.main-content');
+        mainContent.style.marginTop = '0px';
+        mainContent.style.paddingTop = '50px'; // Reapply the original padding if needed
+        mainContent.style.overflowY = 'auto';
+        mainContent.style.overflowX = 'hidden';
+        console.log('Main content styles reset:', mainContent.getBoundingClientRect());
+    }
+
+    function attachEventHandlers() {
+        $('#link-Housepoint').on('click', function(e) {
             e.preventDefault();
-            $('#calendar').hide();
-            console.log("just called calendar.hide()");
-            $('#googleFormContainer').show();
-            loadGoogleFormLink();
-            // No need to reset calendarInitialized here
+            console.log('Housepoint Form button clicked');
+            setPage('housepoint-form');
+            showGoogleForm();
         });
 
         $('#link-calendar').on('click', function(e) {
             e.preventDefault();
-            if ($('#calendar').is(':empty') || !$('#calendar').is(':visible')) {
-                $('#googleFormContainer').hide();
-                hideHomepageContent();
-                console.log("just called googleFormContainer.hide()");
-                $('#calendar').show();
-                loadAndInitializeCalendar();
-                console.log("jsut called laod and initialize calendar)");
-            } else {
-                // Calendar is already initialized and visible
-                $('#googleFormContainer').hide();
-                $('#calendar').show();
-                hideHomepageContent();
-            }
+            console.log('Calendar button clicked');
+            setPage('calendar');
+            toggleVisibility(true);
+            loadAndInitializeCalendar();
+        });
+
+        $('#link-dashboard').on('click', function(e) {
+            e.preventDefault();
+            console.log('Dashboard button clicked');
+            setPage('dashboard');
+            toggleVisibility(false);
         });
     }
 
-    // Function to fetch user permissions
+    function showGoogleForm() {
+        console.log('Showing Google Form');
+        $('#googleFormContainer').show();
+        $('#calendar').hide();
+        $('#calendar-header').hide();
+        $('.key-container').hide();
+        $('#homepage-content').hide();
+    }
+
     function fetchUserPermissions() {
+        console.log('Fetching user permissions');
         $.ajax({
             url: '/user-permissions',
             type: 'GET',
@@ -99,8 +134,8 @@ $(document).ready(function() {
         });
     }
 
-    // Function to reinitialize Select2 with colored text
     function reinitializeSelect2() {
+        console.log('Reinitializing Select2');
         $('#eventType').select2({
             templateResult: function(state) {
                 if (!state.id) {
@@ -118,8 +153,8 @@ $(document).ready(function() {
         });
     }
 
-    // Function to attach event deletion handler
     function attachEventDeletionHandler() {
+        console.log('Attaching event deletion handler');
         $(document).on('click', '#deleteEventButton', function() {
             var eventId = $(this).data('eventId');
             if (eventId && confirm('Are you sure you want to delete this event?')) {
@@ -128,22 +163,55 @@ $(document).ready(function() {
         });
     }
 
-    // Function to load Google Form link
+    function showEventDetails(eventId) {
+        const modalBody = document.querySelector('#eventDetailModal .modal-body');
+        console.log('showEventDetails called');
+
+        fetch(`/fetch-event-details/${eventId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error fetching event details:', data.error);
+                    return;
+                }
+                const startTime = new Date(data.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const endTime = new Date(data.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('eventTitle').textContent = data.title;
+                document.getElementById('eventStart').textContent = startTime;
+                document.getElementById('eventEnd').textContent = endTime;
+                document.getElementById('eventDetailsDescription').textContent = data.description;
+                $('#deleteEventButton').data('eventId', data.id);  // Correct usage of jQuery data method
+                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error fetching event details:', error);
+            });
+    }
+
+    $('.events-list').on('click', '.event-item', function() {
+        var eventId = $(this).data('eventId');
+        showEventDetails(eventId);
+    });
+
     function loadGoogleFormLink() {
+        console.log('Loading Google Form link');
         $.ajax({
-            url: '/settings/google-form-link',  // Update this URL as per your route
+            url: '/settings/google-form-link',
             type: 'GET',
             success: function(response) {
-                googleFormLoaded = true;
                 var googleFormLink = response.google_form_link;
-                console.log(response);
                 $('#googleFormIframe').attr('src', googleFormLink);
-                console.log('Iframe should now load:', googleFormLink);
             },
             error: function() {
                 console.error('Error loading Google Form link');
             }
         });
     }
-    attachEventHandlers(); //initial attachment
+
+    $('#homepage-content').show().css('margin-top', '0');
+    $('#googleFormContainer').hide(); // Ensure the form is hidden initially
+    $('#form-header').hide(); // Ensure the form header is hidden initially
+
+    attachEventHandlers();
 });

@@ -1,20 +1,119 @@
-/* This is to prevent the entire page from being scrollable */
-html, body {
+html {
     height: 100%;
-    width: 101%;
+    width: 100%;
     overflow-x: hidden;
+    background-color: var(--delta-green);
 }
 
-/* Housepoints Section */
-.housepoints-section {
+:root {
+    --delta-green: #A0D1B8; /* Lightened Nile green */
+    --delta-white: #FFFFFF; /* Carnation white */
+    --delta-purple: #5C2592; /* Purple */
+    --sidebar-color: #A1E5BE; /* Sidebar color */
+    --calendar-background: #FFF9DB; /* Light yellow for calendar page */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #FFF9DB;
+    margin: 0px;
+}
+
+/* Center the "All Events" header */
+#calendar-header {
+    background-color: #D4B3FF; /* Light blue background */
+    margin: 0;
+    padding: 10px 0;
+    position: relative; /* Make the header fixed to the top */
+    top: 0;
+    left: 60%; /* Center horizontally */
+    transform: translateX(-52%); /* Adjust for centering */
+    width: 100%;
+    max-width: 1500px; /* Adjust as needed */
+    z-index: 1000;
+    text-align: center; /* Center the text */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fancy-header {
+    font-family: 'Cursive', fraktur; /* Change to your preferred fancy font */
+    font-size: 2.5em;
+    color: #2c3e50; /* Slightly different color than the rest of the page */
+    text-align: center;
+}
+
+.welcome-header {
+    background-color: #add8e6; /* Light blue background */
+    padding: 20px 0;
+    width: calc(100vw - 250px); /* Full width minus the sidebar width */
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 0;
+    margin-top: -50px;
+    z-index: 1000;
+}
+
+
+.todays-events-header {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.events-list {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Align items to the start (left side) */
-    margin-top: 50px;
+    gap: 10px;
+}
+
+/* Adjust event items in today's events */
+.event-item {
+    padding: 10px;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    max-width: 100%; /* Ensure it doesn't overflow */
+}
+
+.event-item:hover {
+    background-color: #e0e0e0;
+}
+
+.event-title {
+    font-weight: bold;
+}
+
+.no-events {
+    padding: 10px;
+    text-align: center;
+    font-style: italic;
+}
+
+.housepoints-and-events {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.todays-events-section {
+    width: 45%;
+    margin-right: 20px; /* Adjust as needed to shift left */
+    margin-left: auto; /* Add this line to shift the section to the left */
+}
+
+/* Adjust the .housepoints-section to move it up slightly */
+.housepoints-section {
+    width: 45%;
+    margin-top: 10px; /* Adjust as needed to move up */
     margin-bottom: 50px;
     margin-left: 20px; /* Adjust as needed to shift left */
 }
 
+/* Housepoints Section */
 .housepoints-header {
     background-color: #E0BBFF; /* Adjust color as needed */
     border-radius: 10px;
@@ -34,6 +133,8 @@ html, body {
     max-width: 416px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .housepoints-table td {
@@ -54,77 +155,64 @@ html, body {
     font-weight: bold;
 }
 
-
+/* Additional styles */
 .alert {
-  padding: 10px;
-  background-color: #f44336; /* Red */
-  color: white;
-  margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f44336; /* Red */
+    color: white;
+    margin-bottom: 15px;
 }
 
-.nav{
+.nav {
     list-style-type: none;
     padding: 0;
 }
 
-.nav-item{
-    display: block
+.nav-item {
+    display: block;
 }
 
-.nav-link{
+.nav-link {
     display: block;
     padding: 10px 15px;
     text-decoration: none;
-    color: #333
+    color: #333;
     transition: background-color 0.3s;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adds a shadow */
     border-radius: 5px; /* Rounded corners for buttons */
     margin-bottom: 5px; /* Adds space between buttons */
 }
 
-.nav-link:hover, .nav-link:focus{
+.nav-link:hover, .nav-link:focus {
     background-color: #e9ecef;
     color: #007bff;
-    text-decoration: none; /*no underlines on hover */
+    text-decoration: none; /* No underlines on hover */
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 @media (max-width: 768px) {
-    .sidebar{
-        width: 100%
+    .sidebar {
+        width: 100%;
         position: static;
     }
-    .main-content{
+    .main-content {
         margin-left: 0;
     }
 }
 
+
 .container {
-    background-image: url('../static/images/welcome_background.png');
+    background-image: url('../static/images/welcome_background.png'); /* Use your actual image path */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
-    height: 100vh; /* Or the height of your image */
-    width: 100vw; /* Or the width of your image */
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
     position: relative; /* Needed for absolute positioning of child elements */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-.header{
-    position: absolute;
-    width: calc(100%-250px);
-    height: 75px;
-    top: 0;
-    left: 20px;
-    right: 0; /* Ensures the header stretches to the full width */
-    z-index: 1020; /* Higher than the sidebar */
-    padding: 10px 20px;
-    color: black;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .slogan {
@@ -133,27 +221,40 @@ html, body {
     /* Other styles */
 }
 
-/* Hide elements by default and only show them on the homepage */
-.homepage-only {
-    display: none;
+
+.header {
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
 }
 
-.featured-image {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-    overflow: hidden;
+
+
+.header .title {
+    font-size: 5rem; /* Adjust font size as needed */
+    color: #5C2592; /* Use your desired color */
+    margin: 5;
 }
+
+.header .subtitle {
+    font-size: 1.5rem; /* Adjust font size as needed */
+    color: #333; /* Use your desired color */
+    margin: 10px 0 0 0;
+}
+
+
+
 
 .featured-image img {
-    width: 100%;
+    width: 101%;
     height: auto;
     max-height: 400px; /* Set a maximum height */
     object-fit: cover; /* Ensures the image covers the container without distortion */
-    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
 }
-
 
 .title {
     font-family: 'Inter', sans-serif;
@@ -190,7 +291,7 @@ html, body {
 }
 
 .login-button {
-  top: 65%;
+    top: 65%;
 }
 
 .register-button {
@@ -204,7 +305,7 @@ html, body {
     flex-direction: column; /* Stacks children vertically */
     align-items: center; /* Centers children horizontally */
     left: 0;
-    background-color: #f8f9fa;
+    background-color: var(--sidebar-color); /* Use the darker light purple color */
     padding-top: 20px;
     z-index: 1000;
     border-right: 2px solid #dee2e6; /* This is your vertical line */
@@ -213,37 +314,205 @@ html, body {
     top: 0;
 }
 
+
 /* Spacing out buttons */
 .sidebar .nav-link {
     margin-bottom: 100px; /* Adds space between buttons */
+    font-weight: bold;
+    background-color: #fff;
     width: 100%;
 }
 
-/* Profile picture placeholder styles */
+.profile-picture-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .profile-picture {
-    width: 100px; /* Diameter of the profile picture circle */
-    height: 100px; /* Diameter of the profile picture circle */
-    border-radius: 50%; /* Makes it circular */
-    background-color: #adb5bd; /* Placeholder color, can be changed or replaced with an image */
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#editProfilePictureLink {
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    color: #007bff;
+    cursor: pointer;
+}
+
+#editProfilePictureLink:hover {
+    text-decoration: underline;
 }
 
 .nav {
     padding-top: 50px; /* Adjust this value to shift buttons down */
     width: 100%; /* Ensures the nav takes full width of its parent */
-    /* ... other styles ... */
 }
 
-
-.main-content{
-    margin-top: 60px;
+.main-content {
+    margin-top: 0px;
     margin-left: 250px;
-    padding-top: 70px;
+    padding-top: 50px;
     overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
     width: calc(100% - 250px); /* Adjust the width according to the sidebar */
+    background-color: var(--calendar-background); /* Light yellow background for calendar page */
 }
 
-.event-color{
+/* Adjust Calendar Position */
+#calendar {
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Adjust the font size and padding to make the calendar appear smaller */
+#calendar .fc {
+    font-size: 0.75em; /* Adjust the font size as needed */
+}
+
+.google-form-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.google-form-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4285f4;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.google-form-button:hover {
+    background-color: #357ae8;
+}
+
+/* Adjusting the key menu */
+.key-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding: 10px;
+    background-color: #D4B3FF; /* Same color as the rest of the calendar page */
+    z-index: 999;
+    position: relative;
+    left: 60%; /* Center horizontally */
+    transform: translateX(-50%); /* Adjust for centering */
+    max-width: 930px; /* Adjust as needed */
+}
+
+.key-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.key-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.google-form-page {
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 1500px;
+    width: 100%;
+    margin-top: 15px;
+}
+
+/* Ensure the form header is above the grey box */
+.google-form-header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.google-form-header h1 {
+    font-size: 2em;
+    font-weight: bold;
+    color: #333;
+}
+
+.housepoint-form-page {
+    background-color: var(--calendar-background); /* Light yellow background color */
+    padding: 40px; /* Add some padding to the content */
+    min-height: 100vh; /* Ensure the content takes the full height of the viewport */
+    display: flex;
+    justify-content: top;
+    align-items: center;
+    flex-direction: column;
+}
+
+#googleFormContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 1500px; /* Adjust the width as needed */
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.edit-profile-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.edit-profile-link a {
+    font-size: 12px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.edit-profile-link a:hover {
+    text-decoration: underline;
+}
+
+/* Style the iframe */
+#googleFormIframe {
+    width: 100%;
+    height: 600px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.logout-container {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.event-color {
     display: inline-block;
     width: 12px;
     height: 12px;
@@ -261,7 +530,7 @@ html, body {
     display: none;  /* Hide the search box */
 }
 
-.select2-container--default .select2-results__option{
+.select2-container--default .select2-results__option {
     background-color: #000; /* Change this to your preferred highlighted background color */
     color: #000; /* And this to your preferred text color for highlighted options */
 }
