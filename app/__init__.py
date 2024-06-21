@@ -11,17 +11,13 @@ from .shared import data
 from app.Model.models import User
 from flask_migrate import Migrate
 
-
 db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
 babel = Babel()
 scheduler = BackgroundScheduler()
 
-
-
 basedir = os.path.abspath(os.path.dirname(__file__))
-
 
 def get_sheet_data(creds, sheet_id, sheet_range):
     service = build('sheets', 'v4', credentials=creds)
@@ -29,24 +25,14 @@ def get_sheet_data(creds, sheet_id, sheet_range):
     result = sheet.values().get(spreadsheetId=sheet_id, range=sheet_range).execute()
     values = result.get('values', [])
 
-    # Print the fetched values for debugging
-    print("Fetched values:", values)
-
     if values:
         header = values[0]
         rows = values[1:]
-        print("Header:", header)
-        print("Number of columns in header:", len(header))
-        for row in rows:
-            print("Row:", row)
-            print("Number of columns in row:", len(row))
-
         df = pd.DataFrame(rows, columns=header)
     else:
         df = pd.DataFrame()
 
     return df
-
 
 def update_data():
     global data
@@ -56,17 +42,14 @@ def update_data():
     SHEET_ID = '1--V44WfrFGoAnxeA_1FF8Ut7fO3KXGUO-hHHjVgxY4o'
     SHEET_RANGE = 'HSPT Totals!A:Z'
 
-    # Fetch the data
     df = get_sheet_data(creds, SHEET_ID, SHEET_RANGE)
 
-    # Initialize the data dictionary if it's None
     if data is None:
         data = {}
 
-    # Process the data
     for _, row in df.iterrows():
         email = row['Email']
-        if pd.notnull(email):  # Ensure the email is not null
+        if pd.notnull(email):
             user_data = {
                 'Brotherhoods': row.get('Brotherhoods', 0),
                 'Social Events': row.get('Social Events', 0),
@@ -78,18 +61,11 @@ def update_data():
             }
             data[email] = user_data
 
-    print("Updated data:", data)
-
-
-
 def init_scheduler(app):
     with app.app_context():
-        all_users = User.query.all()
-        # Schedule the job without passing any args
         scheduler.add_job(func=update_data, trigger="interval", minutes=5)
 
     scheduler.start()
-    # Call update_data once immediately to initialize data
     update_data()
     return scheduler
 
@@ -118,4 +94,3 @@ def create_app():
     return app
 
 flask_app = create_app()
-

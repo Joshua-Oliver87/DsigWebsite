@@ -1,8 +1,4 @@
-from app import flask_app, init_scheduler, update_data
-import os
-from app.shared import data
+from app import flask_app
 
-if __name__ == '__main__':
-    scheduler = init_scheduler(flask_app)
-    print("Initial data:", data)  # Should print the populated data dictionary
-    flask_app.run()
+if __name__ == "__main__":
+    flask_app.run(host='0.0.0.0', port=8080)
