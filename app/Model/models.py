@@ -1,9 +1,12 @@
+from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateTimeField, SelectField
 from wtforms.validators import DataRequired
 from .database import db
+from google.cloud import storage
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -19,6 +22,14 @@ class User(UserMixin, db.Model):
         self.password_hash = generate_password_hash(password)
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+    @property
+    def profile_picture_url(self):
+        if self.profile_picture:
+            bucket_name = current_app.config['delta-sigma-phi-website.appspot.com']
+            return f"https://storage.googleapis.com/{bucket_name}/{self.profile_picture}"
+        return "https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/images/defaultProfilePicture.jpeg"
 
 
 class Settings(db.Model):

@@ -11,6 +11,7 @@ from sqlalchemy.exc import InvalidRequestError
 import os
 from werkzeug.utils import secure_filename
 import logging
+from google.cloud import storage
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../UploadedProfilePictures')
@@ -39,9 +40,13 @@ def register_routes(application):
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            filepath = os.path.join(application.config['UPLOAD_FOLDER'], filename)
-            logging.debug(f'Saving file to {filepath}')
-            file.save(filepath)
+
+            # Upload to Google Cloud Storage
+            bucket_name = application.config['CLOUD_STORAGE_BUCKET']
+            storage_client = storage.Client()
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(filename)
+            blob.upload_from_file(file)
 
             # Update the profile picture field
             current_user.profile_picture = filename
@@ -66,10 +71,6 @@ def register_routes(application):
 
         logging.debug('File not allowed')
         return jsonify({'success': False, 'message': 'File not allowed'})
-
-    @application.route('/uploads/<filename>')
-    def uploaded_file(filename):
-        return send_from_directory(application.config['UPLOAD_FOLDER'], filename)
 
     @application.route('/')
     def welcome():

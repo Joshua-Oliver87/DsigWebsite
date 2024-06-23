@@ -202,7 +202,7 @@ body {
 
 
 .container {
-    background-image: url('../static/images/welcome_background.png'); /* Use your actual image path */
+    background-image: url('https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/images/welcome_background.png'); /* Use your actual image URL */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;

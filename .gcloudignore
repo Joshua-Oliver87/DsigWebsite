@@ -1,0 +1,16 @@
+# .gcloudignore
+# This file specifies files that are *not* uploaded to Google Cloud Platform.
+# For more information, run:
+#   $ gcloud topic gcloudignore
+
+.gcloudignore
+node_modules/
+.git/
+.gitignore
+__pycache__/
+*.pyc
+*.pyo
+.idea/
+.vscode/
+.DS_Store
+thumbs.db

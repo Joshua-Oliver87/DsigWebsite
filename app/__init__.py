@@ -10,6 +10,7 @@ from googleapiclient.discovery import build
 from .shared import data
 from app.Model.models import User
 from flask_migrate import Migrate
+from google.cloud import storage
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -79,6 +80,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'my_database.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = os.path.join(basedir, '..', 'UploadedProfilePictures')
+    app.config['CLOUD_STORAGE_BUCKET'] = 'delta-sigma-phi-website.appspot.com'
     app.secret_key = os.urandom(24)
 
     db.init_app(app)
@@ -92,5 +94,11 @@ def create_app():
         db.create_all()
 
     return app
+
+def get_image_url(blob_name):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(current_app.config['CLOUD_STORAGE_BUCKET'])
+    blob = bucket.blob(blob_name)
+    return blob.public_url
 
 flask_app = create_app()
