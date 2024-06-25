@@ -4,6 +4,31 @@ function openEventModal() {
     $('#editEventModal').modal('show');
 }
 
+function deleteEvent(eventId) {
+    $.ajax({
+        url: '/delete-event',
+        type: 'POST',
+        data: { event_id: eventId },
+        success: function(response) {
+            if (response.status === 'success') {
+                // Ensure the event is removed from the calendar
+                let event = calendar.getEventById(eventId);
+                if (event) {
+                    event.remove();
+                }
+                $('#eventDetailModal').modal('hide');
+                fetchTodaysEvents();  // Refresh today's events
+            } else {
+                console.error('Failed to delete event:', response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Failed to delete event:', error);
+        }
+    });
+}
+
+
 function displayEventDetails(event, canCreateEvents) {
     if (!event.start || !event.end) {
         console.error('Invalid event object:', event);
