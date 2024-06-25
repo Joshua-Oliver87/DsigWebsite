@@ -226,15 +226,11 @@ def register_routes(application):
         can_create_events = current_user.canCreateEvents
         return jsonify({'canCreateEvents': can_create_events})
 
-
-
-
     @application.route('/delete-event', methods=['POST'])
     @login_required
     def delete_event():
         if not current_user.canCreateEvents:
-            flash('You do not have permission to edit the calendar.')
-            return redirect(url_for('calendar_view'))
+            return jsonify({"message": "You do not have permission to delete events.", "status": "error"}), 403
 
         event_id = request.form.get('event_id')
 
@@ -242,7 +238,7 @@ def register_routes(application):
             return jsonify({"message": "Event ID is required", "status": "error"}), 400
 
         try:
-            event_to_delete = db.session.query(Event).get(event_id)
+            event_to_delete = Event.query.get(event_id)
             if event_to_delete:
                 db.session.delete(event_to_delete)
                 db.session.commit()
@@ -254,7 +250,6 @@ def register_routes(application):
         except InvalidRequestError as e:
             current_app.logger.error(f"Session error: {str(e)}")
             db.session.rollback()
-            db.session.remove()  # Ensure the current session is removed and reset
             return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
         except Exception as e:
             db.session.rollback()
@@ -274,42 +269,25 @@ def register_routes(application):
     def calendar_content():
         return render_template('partials/calendar.html')
 
-    @application.route('/create-event', methods=['GET', 'POST'])
+    @application.route('/create-event', methods=['POST'])
     @login_required
     def create_event():
         if not current_user.canCreateEvents:
-            if request.is_xhr:
-                return jsonify({"message": "You do not have permission to create events.", "status": "error"}), 403
-            flash('You do not have permission to create events.')
-            return redirect(url_for('calendar_view'))
+            return jsonify({"message": "You do not have permission to create events.", "status": "error"}), 403
 
-        form = EventForm()
-        if form.validate_on_submit():
-            event = Event(
-                title=form.title.data,
-                description=form.description.data,
-                start=datetime.strptime(form.start.data, '%Y-%m-%d %H'),
-                end=datetime.strptime(form.end.data, '%Y-%m-%d %H'),
-                creator_id=current_user.id,
-                event_type=form.event_type.data,
-                event_color=form.event_color.data
-            )
-            db.session.add(event)
-            try:
-                db.session.commit()
-                if request.is_xhr:
-                    return jsonify({"message": "Event created successfully", "status": "success", "event_id": event.id})
-                flash('Event created successfully!')
-                return redirect(url_for('calendar_view'))
-            except Exception as e:
-                db.session.rollback()
-                if request.is_xhr:
-                    return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
-                flash('An error occurred while saving the event: ' + str(e))
-
-        if request.is_xhr:
-            return jsonify({"message": "Invalid form data", "status": "error"}), 400
-        return render_template('create_event.html', form=form)
+        event_data = request.form
+        new_event = Event(
+            title=event_data.get('title'),
+            description=event_data.get('description'),
+            start=datetime.fromisoformat(event_data.get('start')),
+            end=datetime.fromisoformat(event_data.get('end')),
+            creator_id=current_user.id,
+            event_type=event_data.get('event_type'),
+            event_color=event_data.get('event_color'),
+        )
+        db.session.add(new_event)
+        db.session.commit()
+        return jsonify({"message": "Event added successfully", "status": "success", "event_id": new_event.id})
 
     @application.route('/fetch-events', methods=['GET'])
     @login_required
@@ -332,7 +310,6 @@ def register_routes(application):
         except Exception as e:
             current_app.logger.error(f"Error fetching events: {str(e)}")
             return jsonify({"error": str(e)}), 500
-
     @application.route('/settings/google-form-link')
     def get_google_form_link():
         google_form_link = "https://docs.google.com/forms/d/e/1FAIpQLSeOjs5WVTtI2n2jXxi0duBsEUF10bR-UdW81gRtAvODBGL4Dw/viewform?usp=sf_link"

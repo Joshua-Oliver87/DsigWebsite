@@ -18,7 +18,6 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.status === 'success') {
                     $('#editEventModal').modal('hide');
-                    // Refetch events to update the calendar and today's events
                     calendar.refetchEvents();
                     fetchTodaysEvents();
                     alert('Event added successfully!');
