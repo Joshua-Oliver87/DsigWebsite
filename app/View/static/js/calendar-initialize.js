@@ -105,9 +105,10 @@ function deleteEvent(eventId) {
         data: { event_id: eventId },
         success: function(response) {
             if (response.status === 'success') {
-                calendar.getEventById(eventId).remove();
-                $('#eventDetailModal').modal('hide');
+                // Ensure the event is removed from the calendar
+                calendar.refetchEvents();  // Refetch events from the server
                 fetchTodaysEvents();  // Refresh today's events
+                $('#eventDetailModal').modal('hide');
             } else {
                 console.error('Failed to delete event:', response.message);
             }

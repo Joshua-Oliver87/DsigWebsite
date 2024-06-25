@@ -226,22 +226,8 @@ def register_routes(application):
         can_create_events = current_user.canCreateEvents
         return jsonify({'canCreateEvents': can_create_events})
 
-    @application.route('/add-event', methods=['POST'])
-    @login_required
-    def add_event():
-        event_data = request.form
-        new_event = Event(
-            title=event_data.get('title'),
-            description=event_data.get('description'),
-            start=datetime.fromisoformat(event_data.get('start')),
-            end=datetime.fromisoformat(event_data.get('end')),
-            creator_id=current_user.id,
-            event_type=event_data.get('event_type'),
-            event_color=event_data.get('event_color'),
-        )
-        db.session.add(new_event)
-        db.session.commit()
-        return jsonify({"message": "Event added successfully", "status": "success", "event_id": new_event.id})
+
+
 
     @application.route('/delete-event', methods=['POST'])
     @login_required
@@ -256,7 +242,6 @@ def register_routes(application):
             return jsonify({"message": "Event ID is required", "status": "error"}), 400
 
         try:
-            # Use a fresh session context to query and delete the event
             event_to_delete = db.session.query(Event).get(event_id)
             if event_to_delete:
                 db.session.delete(event_to_delete)
