@@ -83,6 +83,9 @@ def create_app():
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(Config)
 
+    app.config['ENV'] = 'development'
+    app.config['DEBUG'] = True
+
     logging.debug(f"CLOUD_STORAGE_BUCKET: {os.getenv('CLOUD_STORAGE_BUCKET')}")
     logging.debug(f"GOOGLE_APPLICATION_CREDENTIALS: {os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}")
 

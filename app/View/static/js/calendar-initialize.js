@@ -5,11 +5,16 @@ function openEventModal() {
 }
 
 function displayEventDetails(event, canCreateEvents) {
+    if (!event.start || !event.end) {
+        console.error('Invalid event object:', event);
+        return;
+    }
+
     $('#eventDetailModal .modal-title').text(event.title);
     let eventInfoHtml =
         "<p><strong>Description:</strong> " + event.extendedProps.description + "</p>" +
-        "<p><strong>Start:</strong> " + event.start.toLocaleString() + "</p>" +
-        "<p><strong>End:</strong> " + event.end.toLocaleString() + "</p>" +
+        "<p><strong>Start:</strong> " + new Date(event.start).toLocaleString() + "</p>" +
+        "<p><strong>End:</strong> " + new Date(event.end).toLocaleString() + "</p>" +
         "<p><strong>Creator:</strong> " + event.extendedProps.creator + "</p>" +
         "<p><strong>Type of Event:</strong> " + event.extendedProps.event_type + "</p>";
     $('#eventDetailModal .modal-body').html(eventInfoHtml);
@@ -23,6 +28,7 @@ function displayEventDetails(event, canCreateEvents) {
 
     $('#eventDetailModal').modal('show');
 }
+
 
 
 function initializeCalendar(canCreateEvents) {

@@ -329,20 +329,24 @@ def register_routes(application):
     @application.route('/fetch-events', methods=['GET'])
     @login_required
     def fetch_events():
-        events = Event.query.all()
-        events_data = []
-        for event in events:
-            events_data.append({
-                'id': event.id,
-                'title': event.title,
-                'start': event.start.isoformat(),
-                'end': event.end.isoformat(),
-                'description': event.description,
-                'creator': event.creator.username,
-                'event_color': event.event_color,
-                'event_type': event.event_type,
-            })
-        return jsonify(events_data)
+        try:
+            events = Event.query.all()
+            events_list = []
+            for event in events:
+                events_list.append({
+                    'id': event.id,
+                    'title': event.title,
+                    'start': event.start.isoformat(),
+                    'end': event.end.isoformat(),
+                    'description': event.description,
+                    'event_type': event.event_type,
+                    'event_color': event.event_color,
+                    'creator': User.query.get(event.creator_id).username
+                })
+            return jsonify(events_list)
+        except Exception as e:
+            current_app.logger.error(f"Error fetching events: {str(e)}")
+            return jsonify({"error": str(e)}), 500
 
     @application.route('/settings/google-form-link')
     def get_google_form_link():
