@@ -23,6 +23,9 @@ logging.basicConfig(level=logging.DEBUG)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+#def get_image_url(filename):
+    #bucket_name = os.getenv('delta-sigma-phi-website.appspot.com')
+    #return f"https://storage.googleapis.com/{bucket_name}/{filename}"
 def register_routes(application):
     application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -42,7 +45,7 @@ def register_routes(application):
             filename = secure_filename(file.filename)
 
             # Upload to Google Cloud Storage
-            bucket_name = application.config['CLOUD_STORAGE_BUCKET']
+            bucket_name = application.config['delta-sigma-phi-website.appspot.com']
             storage_client = storage.Client()
             bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(filename)
@@ -147,6 +150,7 @@ def register_routes(application):
                 'event_color': event.event_color,
                 'event_type': event.event_type,
             })
+        current_app.logger.info(f"Todays events: {events_data}")
         return jsonify(events_data)
 
     @application.route('/logout')
@@ -248,10 +252,13 @@ def register_routes(application):
 
         event_id = request.form.get('event_id')
 
+        if not event_id:
+            return jsonify({"message": "Event ID is required", "status": "error"}), 400
+
         try:
             # Use a fresh session context to query and delete the event
             event_to_delete = db.session.query(Event).get(event_id)
-            if (event_to_delete):
+            if event_to_delete:
                 db.session.delete(event_to_delete)
                 db.session.commit()
                 current_app.logger.info(f"Deleted event with ID: {event_id}")
@@ -285,7 +292,9 @@ def register_routes(application):
     @application.route('/create-event', methods=['GET', 'POST'])
     @login_required
     def create_event():
-        if not current_user.can_create_events:
+        if not current_user.canCreateEvents:
+            if request.is_xhr:
+                return jsonify({"message": "You do not have permission to create events.", "status": "error"}), 403
             flash('You do not have permission to create events.')
             return redirect(url_for('calendar_view'))
 
@@ -294,8 +303,8 @@ def register_routes(application):
             event = Event(
                 title=form.title.data,
                 description=form.description.data,
-                start=datetime.strptime(form.start.data, '%Y-%m-%d %H:%M:%S'),
-                end=datetime.strptime(form.end.data, '%Y-%m-%d %H:%M:%S'),
+                start=datetime.strptime(form.start.data, '%Y-%m-%d %H'),
+                end=datetime.strptime(form.end.data, '%Y-%m-%d %H'),
                 creator_id=current_user.id,
                 event_type=form.event_type.data,
                 event_color=form.event_color.data
@@ -303,15 +312,21 @@ def register_routes(application):
             db.session.add(event)
             try:
                 db.session.commit()
+                if request.is_xhr:
+                    return jsonify({"message": "Event created successfully", "status": "success", "event_id": event.id})
                 flash('Event created successfully!')
+                return redirect(url_for('calendar_view'))
             except Exception as e:
-                flash('An error occurred while saving the event: ' + str(e))
                 db.session.rollback()
-            return redirect(url_for('calendar_view'))
+                if request.is_xhr:
+                    return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
+                flash('An error occurred while saving the event: ' + str(e))
 
+        if request.is_xhr:
+            return jsonify({"message": "Invalid form data", "status": "error"}), 400
         return render_template('create_event.html', form=form)
 
-    @application.route('/fetch-events')
+    @application.route('/fetch-events', methods=['GET'])
     @login_required
     def fetch_events():
         events = Event.query.all()

@@ -11,6 +11,8 @@ from .shared import data
 from app.Model.models import User
 from flask_migrate import Migrate
 from google.cloud import storage
+import logging
+from .config import Config
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -21,6 +23,7 @@ scheduler = BackgroundScheduler()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 def get_sheet_data(creds, sheet_id, sheet_range):
+    logging.info("Fetching data from Google Sheets...")
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets()
     result = sheet.values().get(spreadsheetId=sheet_id, range=sheet_range).execute()
@@ -30,8 +33,10 @@ def get_sheet_data(creds, sheet_id, sheet_range):
         header = values[0]
         rows = values[1:]
         df = pd.DataFrame(rows, columns=header)
+        logging.info(f"Data fetched: {df.head()}")
     else:
         df = pd.DataFrame()
+        logging.info("No data found in the specified range.")
 
     return df
 
@@ -76,12 +81,25 @@ def create_app():
     static_dir = os.path.abspath(os.path.join(basedir, 'View', 'static'))
 
     app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+    app.config.from_object(Config)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'my_database.db')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['UPLOAD_FOLDER'] = os.path.join(basedir, '..', 'UploadedProfilePictures')
-    app.config['CLOUD_STORAGE_BUCKET'] = 'delta-sigma-phi-website.appspot.com'
-    app.secret_key = os.urandom(24)
+    logging.debug(f"CLOUD_STORAGE_BUCKET: {os.getenv('CLOUD_STORAGE_BUCKET')}")
+    logging.debug(f"GOOGLE_APPLICATION_CREDENTIALS: {os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}")
+
+    @app.context_processor
+    def utility_processor():
+        def get_image_url(blob_name):
+            storage_client = storage.Client()
+            bucket_name = current_app.config['CLOUD_STORAGE_BUCKET']
+            bucket = storage_client.bucket(bucket_name)
+            if not bucket_name:
+                logging.error("CLOUD_STORAGE_BUCKET environment variable is not set.")
+            else:
+                logging.info(f"CLOUD_STORAGE_BUCKET is set to: {bucket_name}")
+            blob = bucket.blob(blob_name)
+            return blob.public_url
+
+        return dict(get_image_url=get_image_url)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -94,11 +112,5 @@ def create_app():
         db.create_all()
 
     return app
-
-def get_image_url(blob_name):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(current_app.config['CLOUD_STORAGE_BUCKET'])
-    blob = bucket.blob(blob_name)
-    return blob.public_url
 
 flask_app = create_app()

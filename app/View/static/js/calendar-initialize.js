@@ -63,7 +63,8 @@ function initializeCalendar(canCreateEvents) {
 }
 
 
-
+// Ensure the function is globally accessible
+window.initializeCalendar = initializeCalendar;
 
 
 function deleteEvent(eventId) {

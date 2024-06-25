@@ -6,7 +6,7 @@
     <title>User Homepage</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/css/main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
@@ -16,8 +16,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
 
-    <script src="{{ url_for('static', filename='js/submit_event.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/calendar-initialize.js') }}" defer></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/calendar-initialize.js"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/submit_event.js"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/main.js"></script>
     <script>
         var canCreateEvents = {{ can_create_events | default(false) | tojson }};
         console.log("canCreateEvents in user_homepage.html:", canCreateEvents);
@@ -143,7 +144,7 @@
             <div class="col-md-3 col-lg-2 sidebar">
                 <!-- Your sidebar content -->
                 <div class="profile-picture-container">
-                    <img id="profilePicture" src="{{ current_user.profile_picture_url }}" alt="Profile Picture">
+                    <img id="profilePicture" src="{{ get_image_url(current_user.profile_picture) }}" alt="Profile Picture">
                     <a href="#" id="editProfilePicture">Edit Profile Picture</a>
                     <input type="file" id="uploadProfilePicture" style="display: none;" accept="image/*">
                 </div>
@@ -169,7 +170,7 @@
                         <h1>Welcome, {{ current_user.username }}!</h1>
                     </div>
                     <div class="featured-image">
-                        <img src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/images/DeltaSigmaPhi.png" alt="Delta Sigma Phi">
+                        <img src="{{ get_image_url('DeltaSigmaPhi.png') }}" alt="Delta Sigma Phi">
                     </div>
                     <div class="housepoints-and-events">
                         <div class="housepoints-section">

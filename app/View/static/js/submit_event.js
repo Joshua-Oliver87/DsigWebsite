@@ -12,7 +12,7 @@ $(document).ready(function() {
         };
 
         $.ajax({
-            url: '/add-event',
+            url: '/create-event',
             type: 'POST',
             data: eventData,
             success: function(response) {

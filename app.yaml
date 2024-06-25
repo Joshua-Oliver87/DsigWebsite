@@ -1,13 +1,10 @@
 runtime: python39
-
 entrypoint: gunicorn -b :$PORT run:flask_app
 
 handlers:
 - url: /static
-  static_dir: app/static
-
-- url: /.*
-  script: auto
+  static_dir: app/View/static
 
 env_variables:
   CLOUD_STORAGE_BUCKET: "delta-sigma-phi-website.appspot.com"
+  GOOGLE_APPLICATION_CREDENTIALS: "delta-sigma-phi-website-e19be0fb9757.json"

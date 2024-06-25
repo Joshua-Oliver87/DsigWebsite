@@ -35,6 +35,21 @@ $(document).ready(function() {
         $('body').attr('class', page === 'housepoint-form' ? 'housepoint-form-page' : '');
     }
 
+    function fetchUserPermissions() {
+        console.log('Fetching user permissions');
+        $.ajax({
+            url: '/user-permissions',
+            type: 'GET',
+            success: function(response) {
+                var canCreateEvents = response.canCreateEvents;
+                initializeCalendar(canCreateEvents);
+            },
+            error: function() {
+                console.error('Error fetching user permissions');
+            }
+        });
+    }
+
     function loadAndInitializeCalendar() {
         if (!calendarInitialized) {
             console.log('Loading and initializing calendar');
@@ -72,8 +87,7 @@ $(document).ready(function() {
             $('.key-container').hide();
             $('#homepage-content').show().css('margin-top', '0');  // Reset margin-top
             $('#googleFormContainer').hide();
-
-             resetMainContentStyles();
+            resetMainContentStyles();
         }
     }
 
@@ -119,21 +133,6 @@ $(document).ready(function() {
         $('#homepage-content').hide();
     }
 
-    function fetchUserPermissions() {
-        console.log('Fetching user permissions');
-        $.ajax({
-            url: '/user-permissions',
-            type: 'GET',
-            success: function(response) {
-                var canCreateEvents = response.canCreateEvents;
-                initializeCalendar(canCreateEvents);
-            },
-            error: function() {
-                console.error('Error fetching user permissions');
-            }
-        });
-    }
-
     function reinitializeSelect2() {
         console.log('Reinitializing Select2');
         $('#eventType').select2({
@@ -155,6 +154,7 @@ $(document).ready(function() {
 
     function attachEventDeletionHandler() {
         console.log('Attaching event deletion handler');
+        $(document).off('click', '#deleteEventButton'); // Remove any existing handler
         $(document).on('click', '#deleteEventButton', function() {
             var eventId = $(this).data('eventId');
             if (eventId && confirm('Are you sure you want to delete this event?')) {
