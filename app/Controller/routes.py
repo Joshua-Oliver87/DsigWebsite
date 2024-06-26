@@ -238,15 +238,16 @@ def register_routes(application):
             return jsonify({"message": "Event ID is required", "status": "error"}), 400
 
         try:
-            event_to_delete = Event.query.get(event_id)
-            if event_to_delete:
-                db.session.delete(event_to_delete)
-                db.session.commit()
-                current_app.logger.info(f"Deleted event with ID: {event_id}")
-                return jsonify({"message": "Event deleted successfully", "status": "success"})
-            else:
-                current_app.logger.error(f"Event with ID: {event_id} not found.")
-                return jsonify({"message": "Event not found", "status": "error"}), 404
+            with db.session.no_autoflush:
+                event_to_delete = db.session.query(Event).get(event_id)
+                if event_to_delete:
+                    db.session.delete(event_to_delete)
+                    db.session.commit()
+                    current_app.logger.info(f"Deleted event with ID: {event_id}")
+                    return jsonify({"message": "Event deleted successfully", "status": "success"})
+                else:
+                    current_app.logger.error(f"Event with ID: {event_id} not found.")
+                    return jsonify({"message": "Event not found", "status": "error"}), 404
         except InvalidRequestError as e:
             current_app.logger.error(f"Session error: {str(e)}")
             db.session.rollback()
