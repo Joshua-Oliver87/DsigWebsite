@@ -5,7 +5,8 @@ function deleteEvent(eventId) {
         data: { event_id: eventId },
         success: function(response) {
             if (response.status === 'success') {
-                calendar.refetchEvents();
+                console.log('Event deleted successfully:', response); // Add this line for debugging
+                refreshCalendar();
                 fetchTodaysEvents();
                 $('#eventDetailModal').modal('hide');
             } else {
@@ -23,6 +24,7 @@ function fetchTodaysEvents() {
         url: '/fetch-todays-events',
         type: 'GET',
         success: function(events) {
+            console.log('Fetched today\'s events:', events); // Add this line for debugging
             var eventsList = $('.events-list');
             eventsList.empty();
             events.forEach(event => {
@@ -53,9 +55,9 @@ function displayEventDetails(event, canCreateEvents) {
     }
 
     let eventInfoHtml =
-        "<p><strong>Description:</strong> " + event.extendedProps.description + "</p>" +
+        "<p><strong>Description:</strong> " + (event.extendedProps.description || '') + "</p>" +
         "<p><strong>Start:</strong> " + new Date(event.start).toLocaleString() + "</p>" +
-        "<p><strong>End:</strong> " + new Date(event.end).toLocaleString() + "</p>" +
+        "<p><strong>End:</strong> " + new Date(event.end).toLocaleString() + "</p>";
 
     $('#eventDetailModal .modal-title').text(event.title);
     $('#eventDetailModal .modal-body').html(eventInfoHtml);
@@ -70,6 +72,14 @@ function displayEventDetails(event, canCreateEvents) {
     $('#eventDetailModal').modal('show');
 }
 
+function refreshCalendar() {
+    if (window.calendar) {
+        window.calendar.refetchEvents();
+        console.log('Calendar events refreshed'); // Add this line for debugging
+    } else {
+        console.error('Calendar instance not found.');
+    }
+}
 
 function initializeCalendar(canCreateEvents) {
     var calendarEl = document.getElementById('calendar');
@@ -89,26 +99,20 @@ function initializeCalendar(canCreateEvents) {
             center: 'title',
             right: canCreateEvents ? 'editCalendarButton' : ''
         },
-        customButtons: {},
+        customButtons: canCreateEvents ? {
+            editCalendarButton: {
+                text: 'Edit Calendar',
+                click: function() {
+                    openEventModal();
+                }
+            }
+        } : {},
         contentHeight: 'auto',
         aspectRatio: 2,
     };
 
-    if (canCreateEvents) {
-        calendarOptions.customButtons.editCalendarButton = {
-            text: 'Edit Calendar',
-            click: function() {
-                openEventModal();
-            }
-        };
-    }
-
     window.calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
     calendar.render();
-}
-
-function refreshCalendar() {
-    window.calendar.refetchEvents();
 }
 
 $(document).ready(function() {
