@@ -42,6 +42,33 @@ function fetchTodaysEvents() {
     });
 }
 
+function openEventModal() {
+    $('#editEventModal').modal('show');
+}
+
+function displayEventDetails(event, canCreateEvents) {
+    if (!event.start || !event.end) {
+        console.error('Invalid event object:', event);
+        return;
+    }
+
+    $('#eventDetailModal .modal-title').text(event.title);
+    let eventInfoHtml =
+        "<p><strong>Description:</strong> " + event.extendedProps.description + "</p>" +
+        "<p><strong>Start:</strong> " + new Date(event.start).toLocaleString() + "</p>" +
+        "<p><strong>End:</strong> " + new Date(event.end).toLocaleString() + "</p>" +
+    $('#eventDetailModal .modal-body').html(eventInfoHtml);
+    $('#deleteEventButton').data('eventId', event.id);
+
+    if (canCreateEvents) {
+        $('#deleteEventButton').show();
+    } else {
+        $('#deleteEventButton').hide();
+    }
+
+    $('#eventDetailModal').modal('show');
+}
+
 function initializeCalendar(canCreateEvents) {
     var calendarEl = document.getElementById('calendar');
     var calendarOptions = {

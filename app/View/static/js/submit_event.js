@@ -17,6 +17,7 @@ $(document).ready(function() {
             data: eventData,
             success: function(response) {
                 if (response.status === 'success') {
+                    console.log('Event created successfully:', response);
                     $('#editEventModal').modal('hide');
                     calendar.refetchEvents();
                     fetchTodaysEvents();

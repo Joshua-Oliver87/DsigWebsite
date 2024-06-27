@@ -212,6 +212,11 @@ def register_routes(application):
             flash("User not found.")
         return redirect(url_for('admin_dashboard'))
 
+    @application.after_request
+    def add_header(response):
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+
     @application.route('/calendar')
     @login_required
     def calendar_view():
@@ -307,10 +312,12 @@ def register_routes(application):
                     'event_color': event.event_color,
                     'creator': User.query.get(event.creator_id).username
                 })
+            current_app.logger.info(f"Fetched events: {events_list}")
             return jsonify(events_list)
         except Exception as e:
             current_app.logger.error(f"Error fetching events: {str(e)}")
             return jsonify({"error": str(e)}), 500
+
     @application.route('/settings/google-form-link')
     def get_google_form_link():
         google_form_link = "https://docs.google.com/forms/d/e/1FAIpQLSeOjs5WVTtI2n2jXxi0duBsEUF10bR-UdW81gRtAvODBGL4Dw/viewform?usp=sf_link"
