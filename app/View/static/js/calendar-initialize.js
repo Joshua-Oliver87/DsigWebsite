@@ -52,11 +52,12 @@ function displayEventDetails(event, canCreateEvents) {
         return;
     }
 
-    $('#eventDetailModal .modal-title').text(event.title);
     let eventInfoHtml =
         "<p><strong>Description:</strong> " + event.extendedProps.description + "</p>" +
         "<p><strong>Start:</strong> " + new Date(event.start).toLocaleString() + "</p>" +
         "<p><strong>End:</strong> " + new Date(event.end).toLocaleString() + "</p>" +
+
+    $('#eventDetailModal .modal-title').text(event.title);
     $('#eventDetailModal .modal-body').html(eventInfoHtml);
     $('#deleteEventButton').data('eventId', event.id);
 
@@ -68,6 +69,7 @@ function displayEventDetails(event, canCreateEvents) {
 
     $('#eventDetailModal').modal('show');
 }
+
 
 function initializeCalendar(canCreateEvents) {
     var calendarEl = document.getElementById('calendar');
@@ -103,6 +105,10 @@ function initializeCalendar(canCreateEvents) {
 
     window.calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
     calendar.render();
+}
+
+function refreshCalendar() {
+    window.calendar.refetchEvents();
 }
 
 $(document).ready(function() {

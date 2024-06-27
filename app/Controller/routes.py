@@ -212,11 +212,6 @@ def register_routes(application):
             flash("User not found.")
         return redirect(url_for('admin_dashboard'))
 
-    @application.after_request
-    def add_header(response):
-        response.headers['Cache-Control'] = 'no-store'
-        return response
-
     @application.route('/calendar')
     @login_required
     def calendar_view():

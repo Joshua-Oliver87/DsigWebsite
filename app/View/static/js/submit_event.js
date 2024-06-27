@@ -19,7 +19,7 @@ $(document).ready(function() {
                 if (response.status === 'success') {
                     console.log('Event created successfully:', response);
                     $('#editEventModal').modal('hide');
-                    calendar.refetchEvents();
+                    refreshCalendar();
                     fetchTodaysEvents();
                     alert('Event added successfully!');
                 } else {

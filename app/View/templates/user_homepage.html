@@ -16,8 +16,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
 
-    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/calendar-initialize.js"></script>
-    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/submit_event.js"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/calendar-initialize.js?v=1.0"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/submit_event.js?v=1.0"></script>
     <script>
         var canCreateEvents = {{ can_create_events | default(false) | tojson }};
         console.log("canCreateEvents in user_homepage.html:", canCreateEvents);
@@ -208,6 +208,6 @@
             </div>
         </div>
     </div>
-    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/main.js"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/main.js?v=1.0"></script>
 </body>
 </html>
