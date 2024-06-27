@@ -1,11 +1,12 @@
 function deleteEvent(eventId) {
+    console.log('Deleting event with ID:', eventId); // Add console log
     $.ajax({
         url: '/delete-event',
         type: 'POST',
         data: { event_id: eventId },
         success: function(response) {
+            console.log('Delete event response:', response); // Add console log
             if (response.status === 'success') {
-                console.log('Event deleted successfully:', response); // Add this line for debugging
                 refreshCalendar();
                 fetchTodaysEvents();
                 $('#eventDetailModal').modal('hide');
@@ -20,11 +21,12 @@ function deleteEvent(eventId) {
 }
 
 function fetchTodaysEvents() {
+    console.log('Fetching today\'s events'); // Add console log
     $.ajax({
         url: '/fetch-todays-events',
         type: 'GET',
         success: function(events) {
-            console.log('Fetched today\'s events:', events); // Add this line for debugging
+            console.log('Fetched today\'s events:', events); // Add console log
             var eventsList = $('.events-list');
             eventsList.empty();
             events.forEach(event => {
@@ -75,11 +77,12 @@ function displayEventDetails(event, canCreateEvents) {
 function refreshCalendar() {
     if (window.calendar) {
         window.calendar.refetchEvents();
-        console.log('Calendar events refreshed'); // Add this line for debugging
+        console.log('Calendar events refreshed'); // Add console log
     } else {
         console.error('Calendar instance not found.');
     }
 }
+
 
 function initializeCalendar(canCreateEvents) {
     var calendarEl = document.getElementById('calendar');
@@ -113,6 +116,7 @@ function initializeCalendar(canCreateEvents) {
 
     window.calendar = new FullCalendar.Calendar(calendarEl, calendarOptions);
     calendar.render();
+    console.log('Calendar initialized'); // Add console log
 }
 
 $(document).ready(function() {
