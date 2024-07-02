@@ -11,22 +11,28 @@ $(document).ready(function() {
             event_color: $('#eventType option:selected').attr('data-color'),
         };
 
+        console.log('Submitting event data:', eventData);
+
         $.ajax({
-            url: '/create-event',
+            url: '/add-event',
             type: 'POST',
             data: eventData,
             success: function(response) {
-                if (response.status === 'success') {
-                    console.log('Event created successfully:', response);
-                    $('#editEventModal').modal('hide');
-                    refreshCalendar();
-                    fetchTodaysEvents();
-                    alert('Event added successfully!');
-                } else {
-                    var errorAlert = '<div class="alert alert-danger" role="alert">' +
-                        'Error adding event: ' + response.message + '</div>';
-                    $('#errorContainer').html(errorAlert);
+                console.log('Create event response:', response);
+                if (!window.calendar.getEventById(response.event_id)) {
+                    window.calendar.addEvent({
+                        id: response.event_id, // Ensure the event ID is set correctly
+                        ...eventData,
+                        backgroundColor: eventData.event_color,
+                        borderColor: eventData.event_color
+                    });
                 }
+
+                $('#editEventModal').modal('hide');
+
+                refreshCalendar();
+                fetchTodaysEvents();
+                alert('Event added successfully!');
             },
             error: function(xhr, status, error) {
                 var errorAlert = '<div class="alert alert-danger" role="alert">' +

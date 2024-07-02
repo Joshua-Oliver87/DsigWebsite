@@ -270,12 +270,9 @@ def register_routes(application):
     def calendar_content():
         return render_template('partials/calendar.html')
 
-    @application.route('/create-event', methods=['POST'])
+    @application.route('/add-event', methods=['POST'])
     @login_required
-    def create_event():
-        if not current_user.canCreateEvents:
-            return jsonify({"message": "You do not have permission to create events.", "status": "error"}), 403
-
+    def add_event():
         event_data = request.form
         new_event = Event(
             title=event_data.get('title'),
@@ -289,6 +286,43 @@ def register_routes(application):
         db.session.add(new_event)
         db.session.commit()
         return jsonify({"message": "Event added successfully", "status": "success", "event_id": new_event.id})
+
+    @application.route('/create-event', methods=['GET', 'POST'])
+    @login_required
+    def create_event():
+        if not current_user.canCreateEvents:
+            if request.is_xhr:
+                return jsonify({"message": "You do not have permission to create events.", "status": "error"}), 403
+            flash('You do not have permission to create events.')
+            return redirect(url_for('calendar_view'))
+
+        form = EventForm()
+        if form.validate_on_submit():
+            event = Event(
+                title=form.title.data,
+                description=form.description.data,
+                start=datetime.strptime(form.start.data, '%Y-%m-%d %H:%M:%S'),
+                end=datetime.strptime(form.end.data, '%Y-%m-%d %H:%M:%S'),
+                creator_id=current_user.id,
+                event_type=form.event_type.data,
+                event_color=form.event_color.data
+            )
+            db.session.add(event)
+            try:
+                db.session.commit()
+                if request.is_xhr:
+                    return jsonify({"message": "Event created successfully", "status": "success", "event_id": event.id})
+                flash('Event created successfully!')
+                return redirect(url_for('calendar_view'))
+            except Exception as e:
+                db.session.rollback()
+                if request.is_xhr:
+                    return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
+                flash('An error occurred while saving the event: ' + str(e))
+
+        if request.is_xhr:
+            return jsonify({"message": "Invalid form data", "status": "error"}), 400
+        return render_template('create_event.html', form=form)
 
     @application.route('/fetch-events', methods=['GET'])
     @login_required

@@ -103,6 +103,10 @@ $(document).ready(function() {
     function attachEventHandlers() {
         $('#link-Housepoint').on('click', function(e) {
             e.preventDefault();
+            $('#calendar').hide();
+            console.log("just called calendar.hide()");
+            $('#googleFormContainer').show();
+            loadGoogleFormLink();
             console.log('Housepoint Form button clicked');
             setPage('housepoint-form');
             showGoogleForm();
@@ -110,6 +114,18 @@ $(document).ready(function() {
 
         $('#link-calendar').on('click', function(e) {
             e.preventDefault();
+            if ($('#calendar').is(':empty') || !$('#calendar').is(':visible')) {
+                $('#googleFormContainer').hide();
+                hideHomepageContent();
+                console.log("just called googleFormContainer.hide()");
+                $('#calendar').show();
+                loadAndInitializeCalendar();
+                console.log("just called load and initialize calendar)");
+            } else {
+                $('#googleFormContainer').hide();
+                $('#calendar').show();
+                hideHomepageContent();
+            }
             console.log('Calendar button clicked');
             setPage('calendar');
             toggleVisibility(true);
@@ -123,6 +139,7 @@ $(document).ready(function() {
             toggleVisibility(false);
         });
     }
+
 
     function showGoogleForm() {
         console.log('Showing Google Form');
