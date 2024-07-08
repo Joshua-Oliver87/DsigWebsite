@@ -21,15 +21,16 @@ function deleteEvent(eventId) {
 }
 
 function fetchTodaysEvents() {
-    console.log('Fetching today\'s events'); // Add console log
+    console.log('Fetching today\'s events'); // Debug log
     $.ajax({
         url: '/fetch-todays-events',
         type: 'GET',
         success: function(events) {
-            console.log('Fetched today\'s events:', events); // Add console log
+            console.log('Fetched today\'s events:', events); // Debug log
             var eventsList = $('.events-list');
             eventsList.empty();
             events.forEach(event => {
+                console.log('Appending event to today\'s events:', event); // Debug log
                 eventsList.append(
                     `<div class="event-item" data-event-id="${event.id}">
                         <span class="event-title">${event.title}</span>
@@ -37,6 +38,7 @@ function fetchTodaysEvents() {
                 );
             });
             if (events.length === 0) {
+                console.log('No events found for today'); // Debug log
                 eventsList.append('<div class="no-events">No events scheduled for today.</div>');
             }
         },
@@ -77,12 +79,11 @@ function displayEventDetails(event, canCreateEvents) {
 function refreshCalendar() {
     if (window.calendar) {
         window.calendar.refetchEvents();
-        console.log('Calendar events refreshed'); // Add console log
+        console.log('Calendar events refreshed'); // Debug log
     } else {
         console.error('Calendar instance not found.');
     }
 }
-
 
 function initializeCalendar(canCreateEvents) {
     var calendarEl = document.getElementById('calendar');

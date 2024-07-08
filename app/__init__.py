@@ -14,6 +14,8 @@ from google.cloud import storage
 import logging
 from .config import Config
 
+logging.basicConfig(level=logging.INFO)
+
 db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
@@ -21,6 +23,7 @@ babel = Babel()
 scheduler = BackgroundScheduler()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
 
 def get_sheet_data(creds, sheet_id, sheet_range):
     logging.info("Fetching data from Google Sheets...")
@@ -42,13 +45,15 @@ def get_sheet_data(creds, sheet_id, sheet_range):
 
 def update_data():
     global data
-    SERVICE_ACCOUNT_FILE = 'd-sig-housepoints-674a5d8c6fde.json'
+    SERVICE_ACCOUNT_FILE = 'delta-sigma-phi-website-e19be0fb9757.json'
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
     creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     SHEET_ID = '1--V44WfrFGoAnxeA_1FF8Ut7fO3KXGUO-hHHjVgxY4o'
     SHEET_RANGE = 'HSPT Totals!A:Z'
 
+    logging.info("Updating data from Google Sheets...")
     df = get_sheet_data(creds, SHEET_ID, SHEET_RANGE)
+    logging.info(f"Data fetched from Google Sheets: {df}")
 
     if data is None:
         data = {}
@@ -66,12 +71,17 @@ def update_data():
                 'Other': row.get('Other', 0)
             }
             data[email] = user_data
+    logging.info(f"Updated data: {data}")
+
+
 
 def init_scheduler(app):
+    logging.info("Initializing scheduler...")
     with app.app_context():
         scheduler.add_job(func=update_data, trigger="interval", minutes=5)
 
     scheduler.start()
+    logging.info("Scheduler started.")
     update_data()
     return scheduler
 
@@ -95,10 +105,15 @@ def create_app():
             storage_client = storage.Client()
             bucket_name = current_app.config['CLOUD_STORAGE_BUCKET']
             bucket = storage_client.bucket(bucket_name)
+
             if not bucket_name:
                 logging.error("CLOUD_STORAGE_BUCKET environment variable is not set.")
-            else:
-                logging.info(f"CLOUD_STORAGE_BUCKET is set to: {bucket_name}")
+                return None
+
+            if not blob_name:
+                logging.info("No profile picture set, using default profile picture.")
+                blob_name = 'defaultProfilePicture.jpeg'  # Ensure you have this file in your bucket
+
             blob = bucket.blob(blob_name)
             return blob.public_url
 

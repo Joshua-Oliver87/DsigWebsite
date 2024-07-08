@@ -1,9 +1,10 @@
-from datetime import datetime
-from flask import render_template, redirect, url_for, request, flash, jsonify, current_app, abort, send_from_directory, g
+from datetime import datetime, timezone
+import pytz
+from flask import render_template, redirect, url_for, request, flash, jsonify, current_app, abort, send_from_directory, g, make_response
 from flask_login import current_user, login_user, logout_user, login_required
 from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
-from app import db, login_manager
+from app import db, login_manager, update_data, scheduler
 from app.Model.models import User, Event, EventForm, Settings
 from app.Controller.admin_decorator import admin_required
 from app.shared import data
@@ -130,21 +131,29 @@ def register_routes(application):
 
         return render_template('login.html')
 
-    @application.route('/fetch-todays-events')
+    @application.route('/fetch-todays-events', methods=['GET'])
     @login_required
     def fetch_todays_events():
-        today = datetime.now().date()
-        start_of_day = datetime.combine(today, datetime.min.time())
-        end_of_day = datetime.combine(today, datetime.max.time())
+        local_tz = pytz.timezone('America/Los_Angeles')  # Set to your local timezone
+        today = datetime.now(local_tz).date()
 
+        # Correct way to get start and end of the day in local timezone
+        start_of_day = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=local_tz)
+        end_of_day = datetime(today.year, today.month, today.day, 23, 59, 59, 999999, tzinfo=local_tz)
+
+        current_app.logger.info(f"Fetching events for today: {today}")
+        current_app.logger.info(f"Start of day (local time): {start_of_day}")
+        current_app.logger.info(f"End of day (local time): {end_of_day}")
+
+        # Adjusted query to include events that overlap with the current day
         events = Event.query.filter(Event.start <= end_of_day, Event.end >= start_of_day).all()
         events_data = []
         for event in events:
             events_data.append({
                 'id': event.id,
                 'title': event.title,
-                'start': event.start.strftime('%H:%M'),
-                'end': event.end.strftime('%H:%M'),
+                'start': event.start.astimezone(local_tz).strftime('%H:%M'),
+                'end': event.end.astimezone(local_tz).strftime('%H:%M'),
                 'description': event.description,
                 'creator': event.creator.username,
                 'event_color': event.event_color,
@@ -173,6 +182,11 @@ def register_routes(application):
         todays_events = fetch_todays_events().json
         print("Data being passed to template:", user_data)
         return render_template('user_homepage.html', data=user_data, events=todays_events, page='homepage')
+
+    @application.route('/manual-update', methods=['GET'])
+    def manual_update():
+        update_data()
+        return "Data updated manually!"
 
     @application.route('/fetch-event-details/<int:event_id>')
     @login_required
@@ -274,17 +288,23 @@ def register_routes(application):
     @login_required
     def add_event():
         event_data = request.form
+        current_app.logger.info(f"Received event data: {event_data}")
+
+        start_time = datetime.fromisoformat(event_data.get('start')).replace(tzinfo=timezone.utc)
+        end_time = datetime.fromisoformat(event_data.get('end')).replace(tzinfo=timezone.utc)
+
         new_event = Event(
             title=event_data.get('title'),
             description=event_data.get('description'),
-            start=datetime.fromisoformat(event_data.get('start')),
-            end=datetime.fromisoformat(event_data.get('end')),
+            start=start_time,
+            end=end_time,
             creator_id=current_user.id,
             event_type=event_data.get('event_type'),
             event_color=event_data.get('event_color'),
         )
         db.session.add(new_event)
         db.session.commit()
+        current_app.logger.info(f"Added event: {new_event}")
         return jsonify({"message": "Event added successfully", "status": "success", "event_id": new_event.id})
 
     @application.route('/create-event', methods=['GET', 'POST'])
@@ -341,7 +361,7 @@ def register_routes(application):
                     'event_color': event.event_color,
                     'creator': User.query.get(event.creator_id).username
                 })
-            current_app.logger.info(f"Fetched events: {events_list}")
+            current_app.logger.info(f"Fetched events: {events_list}")  # Log the fetched events
             return jsonify(events_list)
         except Exception as e:
             current_app.logger.error(f"Error fetching events: {str(e)}")
@@ -368,3 +388,7 @@ def register_routes(application):
     def housepoint_form():
         return render_template('user_homepage.html', page='housepoint-form')
 
+    @application.route('/check-scheduler', methods=['GET'])
+    def check_scheduler():
+        jobs = scheduler.get_jobs()
+        return jsonify({"jobs": [job.id for job in jobs]})

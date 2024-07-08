@@ -151,7 +151,6 @@ $(document).ready(function() {
     }
 
     function reinitializeSelect2() {
-        console.log('Reinitializing Select2');
         $('#eventType').select2({
             templateResult: function(state) {
                 if (!state.id) {
@@ -168,6 +167,7 @@ $(document).ready(function() {
             }
         });
     }
+
 
     function attachEventDeletionHandler() {
         console.log('Attaching event deletion handler');
@@ -225,6 +225,11 @@ $(document).ready(function() {
             }
         });
     }
+
+    function hideHomepageContent() {
+        $('#homepage-content').hide();
+    }
+
 
     $('#homepage-content').show().css('margin-top', '0');
     $('#googleFormContainer').hide(); // Ensure the form is hidden initially

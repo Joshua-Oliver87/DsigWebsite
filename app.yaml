@@ -4,6 +4,8 @@ entrypoint: gunicorn -b :$PORT run:flask_app
 handlers:
 - url: /static
   static_dir: app/View/static
+  http_headers:
+    Cache-Control: "no-store, no-cache, must-revalidate, max-age=0"
 
 env_variables:
   CLOUD_STORAGE_BUCKET: "delta-sigma-phi-website.appspot.com"
