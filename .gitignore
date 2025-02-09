@@ -1,0 +1,11 @@
+venv/
+delta-sigma-phi-website-e19be0fb9757.json
+app/instance/
+*.pyc
+__pycache__/
+.env
+.vscode/
+.idea/
+app/config.py
+# Ignore SQLite database
+*.db

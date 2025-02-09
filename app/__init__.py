@@ -1,89 +1,17 @@
 import os
-from flask import Flask, current_app
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, current_user
-from flask_babel import Babel
-from apscheduler.schedulers.background import BackgroundScheduler
-import pandas as pd
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from .shared import data
-from app.Model.models import User
-from flask_migrate import Migrate
-from google.cloud import storage
+from flask import Flask
+from flask_login import LoginManager
 import logging
 from .config import Config
+from .database import db, migrate
+from .scheduler import init_scheduler
+from .utils import get_image_url
 
 logging.basicConfig(level=logging.INFO)
-
-db = SQLAlchemy()
 login_manager = LoginManager()
-migrate = Migrate()
-babel = Babel()
-scheduler = BackgroundScheduler()
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-
-def get_sheet_data(creds, sheet_id, sheet_range):
-    logging.info("Fetching data from Google Sheets...")
-    service = build('sheets', 'v4', credentials=creds)
-    sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=sheet_id, range=sheet_range).execute()
-    values = result.get('values', [])
-
-    if values:
-        header = values[0]
-        rows = values[1:]
-        df = pd.DataFrame(rows, columns=header)
-        logging.info(f"Data fetched: {df.head()}")
-    else:
-        df = pd.DataFrame()
-        logging.info("No data found in the specified range.")
-
-    return df
-
-def update_data():
-    global data
-    SERVICE_ACCOUNT_FILE = 'delta-sigma-phi-website-e19be0fb9757.json'
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-    creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    SHEET_ID = '1--V44WfrFGoAnxeA_1FF8Ut7fO3KXGUO-hHHjVgxY4o'
-    SHEET_RANGE = 'HSPT Totals!A:Z'
-
-    logging.info("Updating data from Google Sheets...")
-    df = get_sheet_data(creds, SHEET_ID, SHEET_RANGE)
-    logging.info(f"Data fetched from Google Sheets: {df}")
-
-    if data is None:
-        data = {}
-
-    for _, row in df.iterrows():
-        email = row['Email']
-        if pd.notnull(email):
-            user_data = {
-                'Brotherhoods': row.get('Brotherhoods', 0),
-                'Social Events': row.get('Social Events', 0),
-                'Philanthropy': row.get('Philanthropy', 0),
-                'Recruitment Events': row.get('Recruitment Events', 0),
-                'Programming': row.get('Programming', 0),
-                'Community Service': row.get('Community Service', 0),
-                'Other': row.get('Other', 0)
-            }
-            data[email] = user_data
-    logging.info(f"Updated data: {data}")
-
-
-
-def init_scheduler(app):
-    logging.info("Initializing scheduler...")
-    with app.app_context():
-        scheduler.add_job(func=update_data, trigger="interval", minutes=5)
-
-    scheduler.start()
-    logging.info("Scheduler started.")
-    update_data()
-    return scheduler
 
 def create_app():
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -99,35 +27,21 @@ def create_app():
     logging.debug(f"CLOUD_STORAGE_BUCKET: {os.getenv('CLOUD_STORAGE_BUCKET')}")
     logging.debug(f"GOOGLE_APPLICATION_CREDENTIALS: {os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}")
 
-    @app.context_processor
-    def utility_processor():
-        def get_image_url(blob_name):
-            storage_client = storage.Client()
-            bucket_name = current_app.config['CLOUD_STORAGE_BUCKET']
-            bucket = storage_client.bucket(bucket_name)
-
-            if not bucket_name:
-                logging.error("CLOUD_STORAGE_BUCKET environment variable is not set.")
-                return None
-
-            if not blob_name:
-                logging.info("No profile picture set, using default profile picture.")
-                blob_name = 'defaultProfilePicture.jpeg'  # Ensure you have this file in your bucket
-
-            blob = bucket.blob(blob_name)
-            return blob.public_url
-
-        return dict(get_image_url=get_image_url)
-
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+
+    @app.context_processor
+    def utility_processor():
+        return dict(get_image_url=get_image_url)
 
     with app.app_context():
         from app.Controller.routes import register_routes
         register_routes(app)
         from app.Model.models import User, Event, EventForm, Settings
         db.create_all()
+
+        init_scheduler(app)
 
     return app
 

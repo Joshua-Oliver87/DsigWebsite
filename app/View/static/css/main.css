@@ -165,7 +165,8 @@ body {
 
 .nav {
     list-style-type: none;
-    padding: 0;
+    padding-top: 30px; /* Adjust this value to shift buttons down */
+    width: 100%; /* Ensures the nav takes full width of its parent */
 }
 
 .nav-item {
@@ -309,7 +310,7 @@ body {
     padding-top: 20px;
     z-index: 1000;
     border-right: 2px solid #dee2e6; /* This is your vertical line */
-    overflow-y: auto;
+    overflow: hidden;
     height: 100vh;
     top: 0;
 }
@@ -346,11 +347,6 @@ body {
 
 #editProfilePictureLink:hover {
     text-decoration: underline;
-}
-
-.nav {
-    padding-top: 50px; /* Adjust this value to shift buttons down */
-    width: 100%; /* Ensures the nav takes full width of its parent */
 }
 
 .main-content {
@@ -428,15 +424,61 @@ body {
     border-radius: 3px;
 }
 
-.google-form-page {
-    background-color: white;
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.forms-page > div {
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%; /* or some other value */
+    max-width: 1200px; /* Ensure they have a consistent max width */
+}
+
+
+#importantDocumentsHeader {
+    position: sticky;
+    top: 0;
+    left: 100px; /* Adjust this value based on the width of your sidebar */
+    right: 0;
+    z-index: 1000;
+    background-color: var(--delta-green);
+    padding: 20px 0; /* Increase padding to make it larger */
     text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(100% - 250px); /* Ensure it spans the width of the content area */
+    font-size: 1.5em; /* Adjust font size as needed */
+}
+
+
+#thirdFormContainer,
+#googleFormContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    margin: 50px auto;
     max-width: 1500px;
     width: 100%;
-    margin-top: 15px;
+    margin-left: -20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Specific page styling */
+.google-form-page
+{
+    padding: 20px; /* Similar padding as the google form page */
+    border-radius: 20px; /* Matching border radius */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Matching box-shadow */
+    text-align: center;
+    max-width: 1000px;
+    margin-left: 50px;
+    width: 70%;
+    margin-top: 15px; /* Similar top margin */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 /* Ensure the form header is above the grey box */
@@ -461,19 +503,6 @@ body {
     flex-direction: column;
 }
 
-#googleFormContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
-    border-radius: 10px;
-    margin: 20px auto;
-    max-width: 1500px; /* Adjust the width as needed */
-    width: 100%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
 
 .edit-profile-link {
     text-align: center;
@@ -507,7 +536,7 @@ body {
 
 .logout-container {
     position: absolute;
-    bottom: 40px;
+    bottom: 5px;
     width: 100%;
     text-align: center;
 }

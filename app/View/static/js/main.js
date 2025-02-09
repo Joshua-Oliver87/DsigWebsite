@@ -2,10 +2,29 @@ $(document).ready(function() {
     var calendarInitialized = false;
     var currentPage = 'dashboard';  // Default to 'dashboard'
 
+    console.log("main.js loaded");
+
+    $('.sidebar').removeClass('open');
+
     $('#editProfilePicture').on('click', function(e) {
         e.preventDefault();
         $('#uploadProfilePicture').click();
     });
+
+    $('.sidebar-toggle-btn').on('click', function() {
+        $('.sidebar').toggleClass('open');
+    });
+
+    // Close sidebar when a link inside it is clicked
+    $('.sidebar .nav-link').on('click', function() {
+        $('.sidebar').removeClass('open');
+    });
+
+    $('#homepage-content').show().css('margin-top', '0');
+    $('#googleFormContainer').hide(); // Ensure the form is hidden initially
+    $('#thirdFormContainer').hide();
+    $('#importantDocumentsHeader').hide();
+    $('#form-header').hide(); // Ensure the form header is hidden initially
 
     $('#uploadProfilePicture').on('change', function() {
         var formData = new FormData();
@@ -30,9 +49,59 @@ $(document).ready(function() {
         });
     });
 
-    function setPage(page) {
+    function setPage(page)
+    {
+        // Update the global variable
         currentPage = page;
-        $('body').attr('class', page === 'housepoint-form' ? 'housepoint-form-page' : '');
+        console.log('Setting page to:', page); // Debugging line
+
+        // Define the possible classes
+        const pageClasses = [
+            'housepoint-form-page',
+            'calendar-page',
+            'dashboard-page',
+            'forms-page'
+        ];
+
+        // Clear any previously set body classes
+        $('body').removeClass(pageClasses.join(' '));
+
+        // Map the page value to the corresponding class and apply it
+        switch(page) {
+            case 'housepoint-form':
+                $('body').addClass('housepoint-form-page');
+                break;
+            case 'calendar':
+                $('body').addClass('calendar-page');
+                $('#calendar-header').show(); // Ensure the calendar header is shown
+                $('.key-container').show(); // Show the key container when the calendar is shown
+                break;
+            case 'dashboard':
+                $('body').addClass('dashboard-page');
+                break;
+            case 'forms':
+                $('body').addClass('forms-page');
+                break;
+            default:
+                console.warn('Unknown page:', page);
+                break;
+        }
+
+         console.log('Body classes after setPage:', $('body').attr('class'));
+    }
+
+
+    function toggleVisibility(showCalendar) {
+        if (showCalendar) {
+            $('#calendar').show();
+            $('#calendar-header').show();  // Show calendar header only when showing calendar
+            $('.key-container').show();
+        } else {
+            $('#calendar').hide();
+            $('#calendar-header').hide();  // Hide calendar header when not showing calendar
+            $('.key-container').hide();
+            resetMainContentStyles();
+        }
     }
 
     function fetchUserPermissions() {
@@ -73,24 +142,6 @@ $(document).ready(function() {
         }
     }
 
-    function toggleVisibility(showCalendar) {
-        console.log('Toggling visibility, showCalendar:', showCalendar);
-        if (showCalendar) {
-            $('#googleFormContainer').hide();
-            $('#calendar').show();
-            $('#homepage-content').hide();
-            $('#calendar-header').show();
-            $('.key-container').show();
-        } else {
-            $('#calendar').hide();
-            $('#calendar-header').hide();
-            $('.key-container').hide();
-            $('#homepage-content').show().css('margin-top', '0');  // Reset margin-top
-            $('#googleFormContainer').hide();
-            resetMainContentStyles();
-        }
-    }
-
     function resetMainContentStyles() {
         const mainContent = document.querySelector('.main-content');
         mainContent.style.marginTop = '0px';
@@ -100,44 +151,45 @@ $(document).ready(function() {
         console.log('Main content styles reset:', mainContent.getBoundingClientRect());
     }
 
-    function attachEventHandlers() {
-        $('#link-Housepoint').on('click', function(e) {
+    function attachEventHandlers()
+    {
+        $('#link-forms').on('click', function(e) {
             e.preventDefault();
-            $('#calendar').hide();
-            console.log("just called calendar.hide()");
+            hideAllSections();
+            $('#formsContainer').show();
+            $('#thirdFormContainer').show();
             $('#googleFormContainer').show();
-            loadGoogleFormLink();
-            console.log('Housepoint Form button clicked');
-            setPage('housepoint-form');
-            showGoogleForm();
+            $('#importantDocumentsHeader').show();
+            console.log('Forms container is now visible:', $('#formsContainer').is(':visible'));
+            setPage('forms');
         });
 
         $('#link-calendar').on('click', function(e) {
             e.preventDefault();
-            if ($('#calendar').is(':empty') || !$('#calendar').is(':visible')) {
-                $('#googleFormContainer').hide();
-                hideHomepageContent();
-                console.log("just called googleFormContainer.hide()");
-                $('#calendar').show();
-                loadAndInitializeCalendar();
-                console.log("just called load and initialize calendar)");
-            } else {
-                $('#googleFormContainer').hide();
-                $('#calendar').show();
-                hideHomepageContent();
-            }
-            console.log('Calendar button clicked');
-            setPage('calendar');
-            toggleVisibility(true);
+            hideAllSections();
             loadAndInitializeCalendar();
+            setPage('calendar');
         });
 
         $('#link-dashboard').on('click', function(e) {
             e.preventDefault();
-            console.log('Dashboard button clicked');
+            hideAllSections();
+            $('#homepage-content').show();
             setPage('dashboard');
-            toggleVisibility(false);
         });
+    }
+
+
+    function hideAllSections()
+    {
+        $('#homepage-content').hide();
+        $('#googleFormContainer').hide();
+        $('#calendar').hide();
+        $('#thirdFormContainer').hide();
+        $('#importantDocumentsHeader').hide();
+        $('#formsContainer').hide();
+        $('#calendar-header').hide();
+        $('.key-container').hide();
     }
 
 
@@ -167,7 +219,6 @@ $(document).ready(function() {
             }
         });
     }
-
 
     function attachEventDeletionHandler() {
         console.log('Attaching event deletion handler');
@@ -230,10 +281,6 @@ $(document).ready(function() {
         $('#homepage-content').hide();
     }
 
-
-    $('#homepage-content').show().css('margin-top', '0');
-    $('#googleFormContainer').hide(); // Ensure the form is hidden initially
-    $('#form-header').hide(); // Ensure the form header is hidden initially
-
     attachEventHandlers();
 });
+

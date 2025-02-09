@@ -1,0 +1,162 @@
+/* General mobile adjustments */
+@media only screen and (max-width: 768px) {
+    body {
+        margin: 0;
+        font-size: 1em;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f0f4f8;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 70%;
+        max-width: 250px;
+        position: fixed;
+        left: -100%;  /* Hidden off-screen by default */
+        top: 0;
+        height: 100%;
+        background-color: #343a40;
+        color: white;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+
+    #calendar td {
+        min-width: 50px; /* Adjust to your preference */
+        padding: 10px;   /* Provides more space inside each cell */
+        word-wrap: break-word;
+    }
+
+    .sidebar.open ~ .main-content {
+        margin-top: 60px; /* Adjust as needed */
+    }
+
+    .welcome-header {
+        margin-top: 20px; /* Pushes down the "Welcome" header slightly */
+    }
+
+    .sidebar-toggle-btn {
+        display: block;
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+        font-size: 1.2em;
+        width: 100%;
+        position: fixed;
+        top: 10px; /* Ensure it's at the top of the page */
+        z-index: 1001; /* Higher than other elements */
+    }
+    .nav-link {
+        width: 90%;
+        margin: 10px auto;
+    }
+
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    /* Main Content */
+    .main-content {
+        margin: 0;
+        padding: 50px;
+        width: 100%;
+    }
+
+    /* Calendar Header */
+    #calendar-header {
+        width: 100%;
+        left: 0;
+        transform: none;
+    }
+
+    /* Welcome Header */
+    .welcome-header {
+        width: 100%;
+        font-size: 1.5em;
+    }
+
+    /* Event Modals */
+    .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    .modal-content {
+        border-radius: 5px;
+    }
+
+    /* Housepoints and Events */
+    .housepoints-and-events {
+        flex-direction: column;
+        align-items: center;
+    }
+    .housepoints-section,
+    .todays-events-section {
+        width: 100%;
+        margin: 10px 0;
+    }
+    .housepoints-table,
+    .events-list {
+        width: 100%;
+    }
+
+    /* Flash Messages */
+    .flash-messages {
+        width: 90%;
+        top: 20px;
+    }
+
+    /* Forms Container */
+    .forms-page > div {
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Key Container */
+    .key-container {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .key-item {
+        width: 45%;
+        margin: 5px 0;
+    }
+
+    /* Profile Picture */
+    .profile-picture-container {
+        align-items: center;
+        width: 100%;
+    }
+
+    .profile-picture {
+        width: 80px;
+        height: 80px;
+    }
+
+    /* Buttons */
+    .login-button, .register-button {
+        width: 100%;
+        font-size: 1.1em;
+    }
+
+    /* Calendar */
+    #calendar {
+        padding: 0;
+        width: 100%;
+    }
+
+    /* Google Forms */
+    .google-form-page {
+        width: 100%;
+        margin: 10px 0;
+    }
+    .google-form-button {
+        width: 90%;
+        font-size: 1em;
+    }
+}

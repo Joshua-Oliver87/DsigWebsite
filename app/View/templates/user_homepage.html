@@ -6,9 +6,11 @@
     <title>User Homepage</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/css/main.css">
+    <link rel="stylesheet" href="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/css/main.css?v=8.2">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/css/mobile.css?v=1.2">
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" defer></script>
@@ -16,14 +18,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" defer></script>
 
-    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/calendar-initialize.js?v=7.0"></script>
-    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/submit_event.js?v=7.0"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/calendar-initialize.js?v=8.2"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/submit_event.js?v=8.0"></script>
+
     <script>
         var canCreateEvents = {{ can_create_events | default(false) | tojson }};
         console.log("canCreateEvents in user_homepage.html:", canCreateEvents);
     </script>
 </head>
-<body class="{% if page == 'housepoint-form' %}housepoint-form-page{% elif page == 'calendar' %}calendar-page{% elif page == 'dashboard' %}dashboard-page{% endif %}">
+<body class="{% if page == 'calendar' %}calendar-page{% elif page == 'dashboard' %}dashboard-page{% elif page == 'forms' %}forms-page{% endif %}">
+    <div class="sidebar-toggle-btn">
+        ☰ Menu
+    </div>
+
     <div id="calendar-header" style="display: none;">
         <h1 class="fancy-header">All Events</h1>
     </div>
@@ -136,18 +143,16 @@
             </div>
         </div>
     </div>
-
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 sidebar">
                 <!-- Your sidebar content -->
                 <div class="profile-picture-container">
-                    <img id="profilePicture" src="{{ get_image_url(current_user.profile_picture) }}" alt="Profile Picture">
+                    <img id="profilePicture" src="{{ data['profile_picture_url'] }}" alt="Profile Picture" class="profile-picture">
                     <a href="#" id="editProfilePicture">Edit Profile Picture</a>
                     <input type="file" id="uploadProfilePicture" style="display: none;" accept="image/*">
                 </div>
-
                 <!-- User Info -->
                 <div class="user-info">
                     <span id="userId">{{ user_id }}</span>
@@ -155,7 +160,7 @@
                 <ul class="nav flex-column">
                     <li class="nav-item"><a href="#" class="nav-link" id="link-dashboard">Dashboard</a></li>
                     <li class="nav-item"><a href="#" class="nav-link" id="link-calendar">Calendar</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link" id="link-Housepoint">Housepoint Form</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" id="link-forms">Forms</a></li>
                 </ul>
                 <!-- Log Out Button -->
                 <div class="logout-container">
@@ -199,15 +204,29 @@
                         </div>
                     </div>
                 </div>
-                <div id="googleFormContainer" class="google-form-page" style="display: none;">
-                    <div class="google-form-title">Miscellaneous Housepoints Form</div>
-                    <p>To submit activities/events/other things for housepoints that do not fit in the categories we already have.</p>
-                    <a id="googleFormLink" href="https://docs.google.com/forms/d/e/1FAIpQLSeOjs5WVTtI2n2jXxi0duBsEUF10bR-UdW81gRtAvODBGL4Dw/viewform?usp=sf_link" target="_blank" class="google-form-button">Fill out form</a>
-                </div>
+
                 <div id="calendar"></div>
+                <div id="importantDocumentsHeader">
+                    Important Documents
+                </div>
+
+                <div id="formsContainer" class="forms-page">
+                    <div id="googleFormContainer" class="google-form-page">
+                        <div class="google-form-title">Miscellaneous Housepoints Form</div>
+                        <p>To submit activities/events/other things for housepoints that do not fit in the categories we already have.</p>
+                        <a id="googleFormLink" href="https://docs.google.com/forms/d/e/1FAIpQLSeOjs5WVTtI2n2jXxi0duBsEUF10bR-UdW81gRtAvODBGL4Dw/viewform?usp=sf_link" target="_blank" class="google-form-button">Fill out form</a>
+                    </div>
+
+                    <!-- Third Form (Google Doc) -->
+                    <div id="thirdFormContainer" class="google-form-page">
+                        <div class="google-form-title">View Bylaws</div>
+                        <p>Click the button below to view the Gamma Delta bylaws.</p>
+                        <a id="thirdFormLink" href="https://docs.google.com/document/d/1SnMw9XPpM3datyMseAu6n24xFdcyJEyO/edit?usp=sharing" target="_blank" class="google-form-button">View Document</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/main.js?v=7.0"></script>
+    <script src="https://storage.googleapis.com/delta-sigma-phi-website.appspot.com/js/main.js?v=16.1"></script>
 </body>
 </html>

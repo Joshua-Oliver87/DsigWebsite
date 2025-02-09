@@ -1,6 +1,9 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import pytz
-from flask import render_template, redirect, url_for, request, flash, jsonify, current_app, abort, send_from_directory, g, make_response
+from flask import (
+    render_template, redirect, url_for, request, flash, jsonify, current_app,
+    abort, send_from_directory, g, make_response, session
+)
 from flask_login import current_user, login_user, logout_user, login_required
 from jinja2 import TemplateNotFound
 from werkzeug.security import generate_password_hash
@@ -13,22 +16,63 @@ import os
 from werkzeug.utils import secure_filename
 import logging
 from google.cloud import storage
+from PIL import Image
+from io import BytesIO
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../UploadedProfilePictures')
+UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../uploadedProfilePictures')
 
 logging.basicConfig(level=logging.DEBUG)
-
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-#def get_image_url(filename):
-    #bucket_name = os.getenv('delta-sigma-phi-website.appspot.com')
-    #return f"https://storage.googleapis.com/{bucket_name}/{filename}"
 def register_routes(application):
     application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+    @application.before_request
+    def detect_app_request():
+        user_agent = request.headers.get('User-Agent', '')
+        g.is_app = "median" in user_agent  # Flag to identify app requests
+        if g.is_app:
+            # Set session to be permanent to keep app users logged in
+            session.permanent = True
+            application.permanent_session_lifetime = timedelta(days=30)
+    @application.context_processor
+    def utility_processor():
+        def get_image_url(blob_name):
+            if not blob_name:
+                logging.info("No profile picture set, using default profile picture.")
+                return url_for('static', filename='images/defaultProfilePicture.jpeg')
+
+            storage_client = storage.Client()
+            bucket_name = current_app.config['CLOUD_STORAGE_BUCKET']
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(blob_name)
+
+            if blob.exists():
+                logging.info(f"Serving profile picture from URL: {blob.public_url}")
+                return blob.public_url
+            else:
+                logging.warning(f"Blob {blob_name} does not exist. Using default profile picture.")
+                return url_for('static', filename='images/defaultProfilePicture.jpeg')
+
+        return dict(get_image_url=get_image_url)
+
+    @application.route('/uploads/<filename>')
+    def uploaded_file(filename):
+        bucket_name = application.config['CLOUD_STORAGE_BUCKET']
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(f'images/{filename}')  # Adjusted to point to the 'images' folder if needed
+
+        if blob.exists():
+            image_url = blob.public_url
+            return redirect(image_url)
+        else:
+            # If the blob doesn't exist, serve the default profile picture
+            default_image_url = url_for('static', filename='images/defaultProfilePicture.jpeg')
+            return redirect(default_image_url)
 
     @application.route('/upload_profile_picture', methods=['POST'])
     @login_required
@@ -38,43 +82,28 @@ def register_routes(application):
             return jsonify({'success': False, 'message': 'No file part'})
 
         file = request.files['profile_picture']
-        if file.filename == '':
-            logging.debug('No selected file')
-            return jsonify({'success': False, 'message': 'No selected file'})
+        if file.filename == '' or not allowed_file(file.filename):
+            logging.debug('Invalid file')
+            return jsonify({'success': False, 'message': 'Invalid file'})
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+        filename = secure_filename(f"{current_user.id}_{file.filename}")
+        image = Image.open(file).resize((100, 100), Image.LANCZOS)
+        image_io = BytesIO()
+        image.save(image_io, format=image.format or 'PNG')
+        image_io.seek(0)
 
-            # Upload to Google Cloud Storage
-            bucket_name = application.config['delta-sigma-phi-website.appspot.com']
-            storage_client = storage.Client()
-            bucket = storage_client.bucket(bucket_name)
-            blob = bucket.blob(filename)
-            blob.upload_from_file(file)
+        bucket = storage.Client().bucket(application.config['CLOUD_STORAGE_BUCKET'])
+        blob = bucket.blob(f"images/{filename}")
+        blob.upload_from_file(image_io, content_type=file.content_type)
 
-            # Update the profile picture field
-            current_user.profile_picture = filename
-            logging.debug(f'Attempting to update profile picture to {filename} for user {current_user.id}')
+        if not blob.exists():
+            logging.error(f"Failed to upload to {bucket.name}/images/{filename}")
+            return jsonify({'success': False, 'message': 'Upload failed'})
 
-            try:
-                # Merge current_user into the current session
-                db.session.merge(current_user)
-                db.session.commit()
-                logging.debug(f'Successfully updated profile picture to {filename} for user {current_user.id}')
-            except Exception as e:
-                logging.error(f'Error committing to database: {e}')
-                db.session.rollback()
-                return jsonify({'success': False, 'message': 'Database commit failed'})
-
-            # Confirm the profile picture is updated in the database
-            user_in_db = User.query.get(current_user.id)
-            logging.debug(f'Profile picture in database for user {user_in_db.id}: {user_in_db.profile_picture}')
-
-            image_url = url_for('uploaded_file', filename=filename)
-            return jsonify({'success': True, 'image_url': image_url})
-
-        logging.debug('File not allowed')
-        return jsonify({'success': False, 'message': 'File not allowed'})
+        current_user.profile_picture = f"https://storage.googleapis.com/{bucket.name}/images/{filename}"
+        db.session.merge(current_user)
+        db.session.commit()
+        return jsonify({'success': True, 'image_url': current_user.profile_picture})
 
     @application.route('/')
     def welcome():
@@ -84,7 +113,9 @@ def register_routes(application):
     def load_user(user_id):
         user = User.query.get(int(user_id))
         if user and user.is_approved:
+            logging.debug(f"Loaded user {user.id} with profile picture URL: {user.profile_picture}")
             return user
+        logging.debug(f"User {user_id} not found or not approved.")
         return None
 
     @application.route('/register', methods=['GET', 'POST'])
@@ -179,6 +210,9 @@ def register_routes(application):
              'Other']
         )
         user_data['Total'] = total_points
+        profile_picture_url = current_user.profile_picture or url_for('static', filename='images/defaultProfilePicture.jpeg')
+        user_data['profile_picture_url'] = profile_picture_url
+        logging.debug(f"Data being passed to template: {user_data}")
         todays_events = fetch_todays_events().json
         print("Data being passed to template:", user_data)
         return render_template('user_homepage.html', data=user_data, events=todays_events, page='homepage')
@@ -388,7 +422,16 @@ def register_routes(application):
     def housepoint_form():
         return render_template('user_homepage.html', page='housepoint-form')
 
+
     @application.route('/check-scheduler', methods=['GET'])
     def check_scheduler():
         jobs = scheduler.get_jobs()
-        return jsonify({"jobs": [job.id for job in jobs]})
+        job_details = []
+        for job in jobs:
+            job_details.append({
+                'id': job.id,
+                'name': job.name,
+                'next_run_time': job.next_run_time
+            })
+        logging.info(f"Scheduled jobs: {job_details}")
+        return jsonify({"jobs": job_details})

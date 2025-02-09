@@ -58,6 +58,7 @@ function displayEventDetails(event, canCreateEvents) {
         return;
     }
 
+
     let eventInfoHtml =
         "<p><strong>Description:</strong> " + (event.extendedProps.description || '') + "</p>" +
         "<p><strong>Start:</strong> " + new Date(event.start).toLocaleString() + "</p>" +
@@ -87,6 +88,10 @@ function refreshCalendar() {
 
 function initializeCalendar(canCreateEvents) {
     var calendarEl = document.getElementById('calendar');
+    if (!calendarEl) {
+        console.error('Calendar element not found!');
+        return;
+    }// Early exit if the element is not found
     var calendarOptions = {
         initialView: 'dayGridMonth',
         events: '/fetch-events',
